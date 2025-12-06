@@ -1,0 +1,340 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f5f7fa;
+    color: #333;
+    line-height: 1.6;
+    padding: 20px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: linear-gradient(90deg, #1a3a8f 0%, #2a5bd7 100%);
+    color: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+/* Add to existing CSS */
+.tax-category-note {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 5px;
+    font-style: italic;
+}
+
+.calculator-container {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+@media (max-width: 900px) {
+    .calculator-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+.input-section {
+    background-color: white;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.results-section {
+    background-color: white;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+    font-size: 1.5rem;
+    color: #1a3a8f;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #eef2f7;
+    display: flex;
+    align-items: center;
+}
+
+.section-title i {
+    margin-right: 10px;
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #444;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border 0.3s;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: #2a5bd7;
+    box-shadow: 0 0 0 3px rgba(42, 91, 215, 0.1);
+}
+
+.calculate-btn {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(90deg, #1a3a8f 0%, #2a5bd7 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-top: 10px;
+}
+
+.calculate-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 14px rgba(42, 91, 215, 0.2);
+}
+
+.calculate-btn:active {
+    transform: translateY(0);
+}
+
+.results-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.result-card {
+    background-color: #f9fafc;
+    border-radius: 8px;
+    padding: 20px;
+    border-left: 4px solid #2a5bd7;
+    transition: transform 0.3s;
+}
+
+.result-card:hover {
+    transform: translateY(-3px);
+}
+
+.result-title {
+    font-size: 0.95rem;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.result-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1a3a8f;
+}
+
+.result-value-jpy {
+    color: #d32f2f;
+}
+
+.result-value-lkr {
+    color: #1a8f4a;
+}
+
+.breakdown-section {
+    margin-top: 30px;
+    background-color: white;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.breakdown-title {
+    font-size: 1.3rem;
+    color: #1a3a8f;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.breakdown-title i {
+    margin-right: 10px;
+}
+
+.tax-breakdown {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.tax-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 15px;
+    background-color: #f9fafc;
+    border-radius: 6px;
+    border-left: 3px solid #2a5bd7;
+}
+
+.tax-name {
+    font-weight: 600;
+    color: #444;
+}
+
+.tax-amount {
+    font-weight: 700;
+    color: #1a3a8f;
+}
+
+.total-tax {
+    background-color: #1a3a8f;
+    color: white;
+    padding: 15px;
+    border-radius: 6px;
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+.total-payable {
+    background: linear-gradient(90deg, #1a8f4a 0%, #2ad777 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 6px;
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    font-weight: 700;
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+.summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px dashed #ddd;
+}
+
+.summary-label {
+    color: #666;
+}
+
+.summary-value {
+    font-weight: 600;
+    color: #333;
+}
+
+.note {
+    background-color: #fff8e1;
+    border-left: 4px solid #ffc107;
+    padding: 15px;
+    margin-top: 20px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+footer {
+    text-align: center;
+    margin-top: 40px;
+    padding: 20px;
+    color: #666;
+    font-size: 0.9rem;
+    border-top: 1px solid #ddd;
+}
+
+.currency-symbol {
+    font-size: 0.8em;
+    margin-right: 3px;
+}
+
+.vehicle-info {
+    background-color: #e8f4fd;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.vehicle-model {
+    font-weight: 700;
+    color: #1a3a8f;
+    font-size: 1.2rem;
+}
+
+.vehicle-shipping {
+    font-weight: 600;
+    color: #d32f2f;
+}
+
+/* Add to style.css */
+.download-btn {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(90deg, #1a8f4a 0%, #2ad777 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-top: 10px;
+}
+
+.download-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 14px rgba(42, 215, 119, 0.2);
+}
+
+.download-btn:active {
+    transform: translateY(0);
+}
+
+.download-btn i {
+    margin-right: 8px;
+}
