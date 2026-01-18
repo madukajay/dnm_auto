@@ -5,6 +5,10 @@
  * @param {number} winningBid - Winning bid amount in JPY
  * @returns {number} Auction fee in JPY
  */
+
+const AUTOCOM = 1;
+const ICM = 2;
+
 function getAuctionFee(winningBid) {
     // Validate input
     if (typeof winningBid !== 'number' || winningBid < 0) {
@@ -30,43 +34,156 @@ function getAuctionFee(winningBid) {
  * @param {number} winningBid - The winning bid amount in JPY
  * @returns {number} The calculated charges in JPY
  */
-function calculateCharges(winningBid) {
+function calculateCharges(winningBid, exporter) {
     // Input validation
     if (typeof winningBid !== 'number' || winningBid < 0) {
         throw new Error('Winning bid must be a positive number');
     }
 
-    // For bids up to 1,000,000 JPY
-    if (winningBid <= 1000000) {
-        return 217000;
+    if (exporter === AUTOCOM) {
+        // For bids up to 1,000,000 JPY
+        if (winningBid <= 1000000) {
+            return 217000;
+        }
+        
+        // For bids between 1,001,000 and 1,500,000 JPY
+        if (winningBid <= 1500000) {
+            return 227000;
+        }
+        
+        // For bids between 1,501,000 and 2,000,000 JPY
+        if (winningBid <= 2000000) {
+            return 247000;
+        }
+        
+        // For bids between 2,000,000 and 2,500,000 JPY
+        if (winningBid <= 2500000) {
+            return 267000;
+        }
+        
+        // For bids between 2,500,000 and 3,000,000 JPY
+        if (winningBid <= 3000000) {
+            return 287000;
+        }
+        
+        // For bids above 3,000,000 JPY
+        const baseCharge = 287000;
+        const additionalAmount = winningBid - 3000000;
+        const additionalCharges = Math.ceil(additionalAmount / 500000) * 20000;
+        
+        return baseCharge + additionalCharges;
+    }else{
+        let fobTotal = 0;
+        if (winningBid <= 1000000) {
+            fobTotal = 155000;
+        } else if (winningBid <= 1500000) {
+            fobTotal = 165000;
+        } else if (winningBid <= 2000000) {
+            fobTotal = 170000;
+        } else if (winningBid <= 2500000) {
+            fobTotal = 185000;
+        } else if (winningBid <= 3000000) {
+            fobTotal = 195000;
+        } else if (winningBid <= 3500000) {
+            fobTotal = 210000;
+        } else if (winningBid <= 4000000) {
+            fobTotal = 220000;
+        } else if (winningBid <= 4500000) {
+            fobTotal = 240000;
+        } else if (winningBid <= 5000000) {
+            fobTotal = 255000;
+        } else if (winningBid <= 5500000) {
+            fobTotal = 270000;
+        } else if (winningBid <= 6000000) {
+            fobTotal = 280000;
+        } else if (winningBid <= 6500000) {
+            fobTotal = 295000;
+        } else if (winningBid <= 7000000) {
+            fobTotal = 305000;
+        } else if (winningBid <= 7500000) {
+            fobTotal = 320000;
+        } else if (winningBid <= 8000000) {
+            fobTotal = 330000;
+        } else if (winningBid <= 8500000) {
+            fobTotal = 345000;
+        } else if (winningBid <= 9000000) {
+            fobTotal = 355000;
+        } else if (winningBid <= 9500000) {
+            fobTotal = 370000;
+        } else if (winningBid <= 10000000) {
+            fobTotal = 380000;
+        } else if (winningBid <= 12000000) {
+            fobTotal = 450000;
+        } else {
+            // For bids above 12,000,000 JPY (not allowed)
+            fobTotal = 0; // or 0, or throw an error
+        }
+
+        return fobTotal + 3000; // Adding fixed charge of 3,000 JPY Warranty Cost
     }
-    
-    // For bids between 1,001,000 and 1,500,000 JPY
-    if (winningBid <= 1500000) {
-        return 227000;
+
+
+}
+
+/**  
+ * Get maximum discount voucher based on auction price
+ * @param {number} auctionPrice - Auction price in LKR
+ * @returns {number|null} Maximum discount voucher in LKR or null if not applicable
+ */
+function getMaxDiscountVoucher(auctionPrice) {
+    // Validate input
+    if (typeof auctionPrice !== 'number' || auctionPrice < 1) {
+        return null; // or throw an error
     }
-    
-    // For bids between 1,501,000 and 2,000,000 JPY
-    if (winningBid <= 2000000) {
-        return 247000;
+
+    let maxDiscount = 0;
+
+    // Note: Using <= for upper bounds as per the table ranges
+    if (auctionPrice <= 1000000) {
+        maxDiscount = 80000;
+    } else if (auctionPrice <= 1500000) {
+        maxDiscount = 90000;
+    } else if (auctionPrice <= 2000000) {
+        maxDiscount = 95000;
+    } else if (auctionPrice <= 2500000) {
+        maxDiscount = 105000;
+    } else if (auctionPrice <= 3000000) {
+        maxDiscount = 115000;
+    } else if (auctionPrice <= 3500000) {
+        maxDiscount = 130000;
+    } else if (auctionPrice <= 4000000) {
+        maxDiscount = 140000;
+    } else if (auctionPrice <= 4500000) {
+        maxDiscount = 160000;
+    } else if (auctionPrice <= 5000000) {
+        maxDiscount = 170000;
+    } else if (auctionPrice <= 5500000) {
+        maxDiscount = 180000;
+    } else if (auctionPrice <= 6000000) {
+        maxDiscount = 190000;
+    } else if (auctionPrice <= 6500000) {
+        maxDiscount = 205000;
+    } else if (auctionPrice <= 7000000) {
+        maxDiscount = 215000;
+    } else if (auctionPrice <= 7500000) {
+        maxDiscount = 230000;
+    } else if (auctionPrice <= 8000000) {
+        maxDiscount = 240000;
+    } else if (auctionPrice <= 8500000) {
+        maxDiscount = 250000;
+    } else if (auctionPrice <= 9000000) {
+        maxDiscount = 260000;
+    } else if (auctionPrice <= 9500000) {
+        maxDiscount = 270000;
+    } else if (auctionPrice <= 10000000) {
+        maxDiscount = 280000;
+    } else if (auctionPrice <= 12000000) {
+        maxDiscount = 300000;
+    } else {
+        return 0; // or 0, or the maximum value of 300000
     }
-    
-    // For bids between 2,000,000 and 2,500,000 JPY
-    if (winningBid <= 2500000) {
-        return 267000;
-    }
-    
-    // For bids between 2,500,000 and 3,000,000 JPY
-    if (winningBid <= 3000000) {
-        return 287000;
-    }
-    
-    // For bids above 3,000,000 JPY
-    const baseCharge = 287000;
-    const additionalAmount = winningBid - 3000000;
-    const additionalCharges = Math.ceil(additionalAmount / 500000) * 20000;
-    
-    return baseCharge + additionalCharges;
+
+    return maxDiscount;
 }
 
 /**
@@ -76,16 +193,24 @@ function calculateCharges(winningBid) {
  * @param {number} capacity - Engine capacity in cc
  * @returns {object} Object containing all tax components and total tax
  */
-function calculateVehicleTax(cif, taxCategory, capacity) {
+function calculateVehicleTax(fob, shipping, taxCategory, capacity) {
     // Input validation
-    if (typeof cif !== 'number' || cif < 0) {
-        throw new Error('CIF must be a positive number');
+    if (typeof fob !== 'number' || fob < 0) {
+        throw new Error('FOB must be a positive number');
     }
     
     if (typeof capacity !== 'number' || capacity < 0) {
         throw new Error('Capacity must be a positive number');
     }
-
+    const yenrate = parseFloat(yenrateInput.value);
+    console.log("FOB: ", taxBaseInput.value);  
+    const taxBase = parseFloat(taxBaseInput.value)*(100/110)*0.85; // Convert tax base to FOB equivalent
+    console.log("Tax Base (FOB equivalent): ", taxBase);
+    let cifYen = (fob + shipping);
+    if(taxBase > fob) {
+        cifYen = (taxBase + shipping);
+    }
+    let cif = cifYen * yenrate;
     // Tax rates based on category
     const taxRates = {
         // -- <1000cc Hybrid [HS Code: 8703.40.28]
@@ -218,13 +343,14 @@ function calculateVehicleTax(cif, taxCategory, capacity) {
         capacity: capacity,
         taxRates: category,
         taxComponents: {
-            luxuryTax: parseFloat(luxuryTax.toFixed(2)),
+            CIF: parseFloat(cif.toFixed(2)),
             exciseDuty: parseFloat(exciseDuty.toFixed(2)),
             cid: parseFloat(cid.toFixed(2)),
             surcharge: parseFloat(surcharge.toFixed(2)),
             vat: parseFloat(vat.toFixed(2)),
             vel: VEL,
-            com: COM
+            com: COM,
+            luxuryTax: parseFloat(luxuryTax.toFixed(2)),
         },
         totalTax: parseFloat(totalTax.toFixed(2)),
         totalWithCIF: parseFloat((cif + totalTax).toFixed(2))
@@ -240,7 +366,7 @@ function getShippingCharges(input) {
     // Model to price mapping
     const shippingRates = {
         // ¥103,000 category
-        1: { models: ["Wagon R", "Alto", "Mira", "Yaris", "Move", "EK Wagon"], charge: 103000 },
+        1: { models: ["Alto", "Mira", "EK Wagon", "Wagon R", "Move", "Nissan Dayz", "TAFT", "Yaris"], charge: 103000 },
         
         // ¥109,000 category
         2: { models: ["Fit HV", "X bee", "Hustler", "Aqua", "Swift", "Note"], charge: 109000 },
@@ -255,7 +381,7 @@ function getShippingCharges(input) {
         5: { models: ["Sienta HV", "Freed HV"], charge: 124000 },
         
         // ¥129,000 category
-        6: { models: ["C-HR", "Vezel HV"], charge: 129000 },
+        6: { models: ["C-HR", "Vezel HV", "Yaris Cross"], charge: 129000 },
         
         // ¥135,000 category
         7: { models: ["Leaf", "Honda WR-V", "Audi Q3"], charge: 135000 },
@@ -362,7 +488,10 @@ function getShippingCharges(input) {
 
 // DOM Elements
 const vehicleSelect = document.getElementById('vehicle');
+const vehicleVariantSelect = document.getElementById("vehicleVariant");
 const winningBidInput = document.getElementById('winningBid');
+const areaCostInput = document.getElementById('areaCost');
+const auctionFeeInput = document.getElementById('auctionFee');
 const ttInput = document.getElementById('tt');
 const yenrateInput = document.getElementById('yenrate');
 const clearingInput = document.getElementById('clearing');
@@ -374,6 +503,8 @@ const totalPayableElement = document.getElementById('totalPayable');
 const summaryDetails = document.getElementById('summaryDetails');
 const vehicleInfo = document.getElementById('vehicleInfo');
 const taxCategorySelect = document.getElementById('taxcategory');
+const taxBaseInput = document.getElementById('taxbase');
+const exporterSelect = document.getElementById('exporter');
 const capacityInput = document.getElementById('capacity');
 const downloadPdfBtn = document.getElementById('downloadPdfBtn');
 
@@ -433,75 +564,6 @@ function updateVehicleInfo(vehicle, shippingDetails) {
     `;
 }
 
-// Vehicle default settings mapping
-const vehicleDefaults = {
-    // ¥103,000 category
-    "Wagon R": { taxCategory: "petrol_under_1000", capacity: 660, winningBid: 1000000 },
-    "Alto": { taxCategory: "petrol_under_1000", capacity: 660, winningBid: 900000 },
-    "Mira": { taxCategory: "petrol_under_1000", capacity: 660, winningBid: 900000 },
-    "Move": { taxCategory: "petrol_under_1000", capacity: 660, winningBid: 1200000 },
-    "EK Wagon": { taxCategory: "petrol_under_1000", capacity: 660, winningBid: 850000 },
-    "Yaris": { taxCategory: "petrol_under_1000", capacity: 1000, winningBid: 1500000 },
-    
-    // ¥109,000 category
-    "Fit HV": { taxCategory: "hybrid_1300_1500", capacity: 1300, winningBid: 1500000 },
-    "X bee": { taxCategory: "petrol_under_1000", capacity: 660, winningBid: 900000 },
-    "Hustler": { taxCategory: "hybrid_under_1000", capacity: 660, winningBid: 1000000 },
-    "Aqua": { taxCategory: "hybrid_1300_1500", capacity: 1500, winningBid: 1400000 },
-    "Swift": { taxCategory: "petrol_1000_1300", capacity: 1300, winningBid: 1600000 },
-    "Note": { taxCategory: "hybrid_1000_1300", capacity: 1500, winningBid: 1300000 },
-    
-    // ¥114,000 category
-    "Raize": { taxCategory: "hev_50_100_1year", capacity: 1000, winningBid: 2500000 },
-    "Rocky": { taxCategory: "hev_50_100_1year", capacity: 1000, winningBid: 2400000 },
-    "Roomy": { taxCategory: "petrol_under_1000", capacity: 660, winningBid: 1500000 },
-    
-    // ¥119,000 category
-    "Fielder": { taxCategory: "hybrid_1000_1300", capacity: 1800, winningBid: 1800000 },
-    "Axio": { taxCategory: "petrol_1000_1300", capacity: 1500, winningBid: 1600000 },
-    "Other sedan": { taxCategory: "petrol_1300_1500", capacity: 2000, winningBid: 2000000 },
-    
-    // ¥124,000 category
-    "Sienta HV": { taxCategory: "hybrid_1300_1500", capacity: 1500, winningBid: 1800000 },
-    "Freed HV": { taxCategory: "hybrid_1300_1500", capacity: 1500, winningBid: 1700000 },
-    
-    // ¥129,000 category
-    "C-HR": { taxCategory: "hybrid_1000_1300", capacity: 1800, winningBid: 2200000 },
-    "Vezel HV": { taxCategory: "hybrid_1300_1500", capacity: 1500, winningBid: 2800000 },
-    
-    // ¥135,000 category
-    "Leaf": { taxCategory: "hev_50_100_1year", capacity: 0, winningBid: 1800000 }, // Electric - special category
-    "Honda WR-V": { taxCategory: "petrol_1300_1500", capacity: 1500, winningBid: 1900000 },
-    "Audi Q3": { taxCategory: "petrol_1300_1500", capacity: 2000, winningBid: 3000000 },
-    
-    // ¥140,000 category
-    "Corolla cross": { taxCategory: "hybrid_1300_1500", capacity: 1800, winningBid: 2500000 },
-    
-    // ¥145,000 category
-    "Eclips cross": { taxCategory: "petrol_1300_1500", capacity: 2000, winningBid: 2300000 },
-    "Honda ZR-V": { taxCategory: "hybrid_1300_1500", capacity: 2000, winningBid: 2400000 },
-    
-    // ¥150,000 category
-    "Voxy HV": { taxCategory: "hybrid_1300_1500", capacity: 2000, winningBid: 2800000 },
-    "Noah HV": { taxCategory: "hybrid_1300_1500", capacity: 2000, winningBid: 2700000 },
-    "X-trail": { taxCategory: "petrol_1300_1500", capacity: 2000, winningBid: 2600000 },
-    
-    // ¥155,000 category
-    "CR-V": { taxCategory: "petrol_1300_1500", capacity: 2000, winningBid: 2900000 },
-    "Step Wagon": { taxCategory: "hybrid_1300_1500", capacity: 2000, winningBid: 3000000 },
-    
-    // ¥166,000 category
-    "HIACE V": { taxCategory: "petrol_1300_1500", capacity: 2700, winningBid: 3500000 }, // Diesel - special category
-    "NISSAN CARAVAN": { taxCategory: "petrol_1300_1500", capacity: 2800, winningBid: 3200000 },
-    
-    // ¥176,000 category
-    "ALPHARD": { taxCategory: "hybrid_1300_1500", capacity: 2500, winningBid: 4500000 },
-    "VELLFIRE": { taxCategory: "hybrid_1300_1500", capacity: 2500, winningBid: 4400000 },
-    
-    // ¥186,000 category
-    "Land Cruiser Prado": { taxCategory: "petrol_1300_1500", capacity: 3000, winningBid: 5000000 }
-};
-
 function updateVehicleDefaults() {
     const selectedVehicle = vehicleSelect.value;
     const defaults = vehicleDefaults[selectedVehicle];
@@ -528,6 +590,8 @@ function updateVehicleDefaults() {
         } else {
             winningBidInput.value = 2000000; // Default winning bid
         }
+
+        taxBaseInput.value = defaults.taxbase;
     } else {
         // Default values if vehicle not in mapping
         taxCategorySelect.value = "hybrid_1300_1500";
@@ -539,16 +603,50 @@ function updateVehicleDefaults() {
     calculateAndDisplay();
 }
 
+function updateVehicleVariants() {
+  const vehicle = vehicleSelect.value;
+  const variants = vehicleDefaults[vehicle];
+
+  vehicleVariantSelect.innerHTML = "";
+
+  if (!variants) return;
+
+  variants.forEach((variant, index) => {
+    const opt = document.createElement("option");
+    opt.value = index;
+    opt.textContent = variant.label;
+    vehicleVariantSelect.appendChild(opt);
+  });
+
+  applyVehicleVariant(); // auto apply first variant
+}
+
+function applyVehicleVariant() {
+  const vehicle = vehicleSelect.value;
+  const variantIndex = vehicleVariantSelect.value;
+
+  const variant = vehicleDefaults[vehicle]?.[variantIndex];
+  if (!variant) return;
+
+  taxCategorySelect.value = variant.taxCategory;
+  taxBaseInput.value = variant.taxbase;
+  capacityInput.value = variant.capacity;
+  winningBidInput.value = variant.winningBid;
+
+  calculateAndDisplay();
+}
+
 // Helper function to format tax names
 function formatTaxName(key) {
     const names = {
-        luxuryTax: 'Luxury Tax',
+        CIF: 'CIF',
         exciseDuty: 'Excise Duty',
         cid: 'CID (20% of CIF)',
         surcharge: 'SUR (50% of CID)',
         vat: 'VAT (18%)',
         vel: 'Vehicle Emission Levy',
-        com: 'COM/EXM/SEL'
+        com: 'COM/EXM/SEL',
+        luxuryTax: 'Luxury Tax'
     };
     return names[key] || key;
 }
@@ -572,37 +670,20 @@ function getHandlingFeeCategory(winningBid) {
     else return 'Over ¥3M';
 }
 
-function updateVehicleDefaults() {
-    const selectedVehicle = vehicleSelect.value;
-    const defaults = vehicleDefaults[selectedVehicle];
-    
-    if (defaults) {
-        // Update tax category
-        taxCategorySelect.value = defaults.taxCategory;
-        
-        // Update capacity
-        capacityInput.value = defaults.capacity;
-        
-        // Update winning bid
-        winningBidInput.value = defaults.winningBid;
-        
-        // Trigger calculation
-        calculateAndDisplay();
-    }
-}
-
 // Calculate and display results
 function calculateAndDisplay() {
     try {
         // Get input values
         const vehicle = vehicleSelect.value;
         const winningBid = parseFloat(winningBidInput.value);
-        const TT = parseFloat(ttInput.value);
+        let TT = parseFloat(ttInput.value);
         const yenrate = parseFloat(yenrateInput.value);
         const clearing = parseFloat(clearingInput.value);
         const taxCategory = taxCategorySelect.value; // NEW: Get tax category
+        const exporter = parseInt(exporterSelect.value);
         const capacity = parseFloat(capacityInput.value);
-        const AreaCost = 5000; // Fixed value
+        const AreaCost = parseFloat(areaCostInput.value);
+        const auctionFeeInputValue = parseFloat(auctionFeeInput.value);
         
         // Validate inputs
         if (!vehicle || isNaN(winningBid) || isNaN(TT) || isNaN(yenrate) || isNaN(clearing) || isNaN(capacity)) {
@@ -613,20 +694,30 @@ function calculateAndDisplay() {
         // Get shipping charges
         const shippingDetails = getShippingCharges(vehicle);
         const shipping = shippingDetails.charge;
+
+        if(exporter === ICM){
+            TT = getMaxDiscountVoucher(winningBid);
+        }
         
         // Calculate other charges
-        const handling = calculateCharges(winningBid);
-        const auctionFee = getAuctionFee(winningBid);
+        const handling = calculateCharges(winningBid, exporter);
+        let auctionFee = 0;
+        if(auctionFeeInputValue != 300000){
+            auctionFee = auctionFeeInputValue;
+        }else{
+            auctionFee = getAuctionFee(winningBid);
+        }
         
         // Calculate CIF
-        const cif = (winningBid + shipping + handling - TT + AreaCost);
+        const fob = winningBid + handling + AreaCost - TT;
+        const cif = fob + shipping;
         const lkrCif = cif * yenrate;
         const bankCommission = lkrCif * 0.005;
         const LC = lkrCif + bankCommission;
         const lkrTT = TT * (yenrate + 0.01);
-        
+
         // Calculate taxes
-        const taxDetails = calculateVehicleTax(lkrCif, taxCategory, capacity); // Updated
+        const taxDetails = calculateVehicleTax(fob, shipping, taxCategory, capacity);
         const totalTax = taxDetails.totalTax;
         
         // Calculate total
@@ -727,147 +818,283 @@ function calculateAndDisplay() {
 // PDF Generation Function
 function generatePDF() {
     try {
+
+        const info = prompt(
+            "Please enter vehicle details (separate with commas):\n\n" +
+            "Format: Year, Model Grade, Auction Grade, Mileage\n" +
+            "Example: 2025, G, 5, 10000\n\n" +
+            "Enter details:",
+            "2025, G, 5, 10000"
+        );
+        
+        if (info === null) return; // User cancelled
+        
+        // Parse the input
+        const parts = info.split(',').map(part => part.trim());
+        
+        if (parts.length !== 4) {
+            alert("Invalid format. Please enter all 4 values separated by commas.\nExample: 2025, G, 5, 10000");
+            return;
+        }
+        
+        const [vehicleYear, modelGrade, auctionGrade, mileage] = parts;
+
         // Get current values
         const vehicle = vehicleSelect.value;
         const winningBid = parseFloat(winningBidInput.value);
-        const TT = parseFloat(ttInput.value);
+        let TT = parseFloat(ttInput.value);
         const yenrate = parseFloat(yenrateInput.value);
         const clearing = parseFloat(clearingInput.value);
         const taxCategory = taxCategorySelect.value;
         const capacity = parseFloat(capacityInput.value);
+        const AreaCost = parseFloat(areaCostInput.value);
+        const auctionFeeInputValue = parseFloat(auctionFeeInput.value);
         
         // Recalculate to get current values
         const shippingDetails = getShippingCharges(vehicle);
         const shipping = shippingDetails.charge;
-        const handling = calculateCharges(winningBid);
-        const auctionFee = getAuctionFee(winningBid);
-        const AreaCost = 5000;
-        const cif = (winningBid + shipping + handling - TT + AreaCost);
+        const exporter = parseInt(exporterSelect.value);
+
+        if(exporter == ICM){
+            TT = getMaxDiscountVoucher(winningBid);
+        }
+
+        const handling = calculateCharges(winningBid, exporter);
+        let auctionFee = 0;
+        if(auctionFeeInputValue != 300000){
+            auctionFee = auctionFeeInputValue;
+        }else{
+            auctionFee = getAuctionFee(winningBid);
+        }
+        const fob = winningBid + handling + AreaCost - TT;
+        const cif = fob + shipping;
         const lkrCif = cif * yenrate;
         const bankCommission = lkrCif * 0.005;
         const LC = lkrCif + bankCommission;
         const lkrTT = TT * (yenrate + 0.01);
-        const taxDetails = calculateVehicleTax(lkrCif, taxCategory, capacity);
+        const taxDetails = calculateVehicleTax(fob, shipping, taxCategory, capacity);
         const totalTax = taxDetails.totalTax;
         const totalLKR = auctionFee + lkrTT + LC + totalTax + clearing;
+        
+        // Get current date and time
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+        const timeStr = now.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        });
         
         // Create PDF
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('p', 'mm', 'a4');
         
-        // Set font
-        doc.setFont("helvetica");
+        // Set red and black theme colors
+        const primaryRed = [178, 34, 34]; // Firebrick red
+        const darkRed = [139, 0, 0]; // Dark red
+        const lightRed = [255, 99, 71]; // Tomato red
+        const black = [0, 0, 0];
+        const darkGray = [51, 51, 51];
+        const lightGray = [245, 245, 245];
         
-        // Title
-        doc.setFontSize(20);
-        doc.setTextColor(26, 58, 143);
-        doc.text("VEHICLE IMPORT COST BREAKDOWN", 105, 20, null, null, 'center');
+        // Add header with gradient
+        doc.setFillColor(...primaryRed);
+        doc.rect(0, 0, 210, 30, 'F');
         
-        doc.setFontSize(11);
-        doc.setTextColor(100, 100, 100);
-        doc.text("Generated on: " + new Date().toLocaleDateString(), 105, 28, null, null, 'center');
+        // Add DNM AUTO logo (text-based)
+        doc.setTextColor(255, 255, 255);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(24);
+        doc.text("DNM AUTO", 25, 12);
         
-        // Separator line
-        doc.setDrawColor(26, 58, 143);
-        doc.setLineWidth(0.5);
-        doc.line(20, 32, 190, 32);
+        // Add company tagline
+        doc.setFontSize(18);
+        doc.setTextColor(255, 255, 255);
+        doc.setFont("helvetica", "bold");
+        doc.text(" - Vehicle Import Specialists", 72, 12);
+
+        doc.setFontSize(12);
+        doc.text("Newtown, Embilipitiya | School Lane, Rukmalgama, Kottawa", 25, 20);
+        doc.text("Tel: 077 847 2900 | 071 346 6099", 25, 26);
+        
+        // Add document title
+        doc.setFontSize(16);
+        doc.setTextColor(...darkRed);
+        doc.setFont("helvetica", "bold");
+        doc.text("VEHICLE IMPORT COST BREAKDOWN", 105, 40, null, null, 'center');
+        
+        // Add date and reference
+        doc.setFontSize(10);
+        doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
+        doc.text(`Generated: ${dateStr} at ${timeStr}`, 105, 47, null, null, 'center');
+        doc.text(`Reference: ${vehicle.replace(/\s+/g, '_')}_${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}_${Math.floor(Math.random() * 10000)}`, 105, 52, null, null, 'center');
+        
+        // Separator line with red color
+        doc.setDrawColor(...primaryRed);
+        doc.setLineWidth(0.8);
+        doc.line(15, 57, 195, 57);
         
         // Vehicle Information Section
         doc.setFontSize(14);
-        doc.setTextColor(26, 58, 143);
-        doc.text("VEHICLE INFORMATION", 20, 42);
+        doc.setTextColor(...darkRed);
+        doc.setFont("helvetica", "bold");
+        doc.text("VEHICLE INFORMATION", 15, 68);
         
-        doc.setFontSize(10);
-        doc.setTextColor(0, 0, 0);
-        doc.text(`Vehicle Model: ${vehicle}`, 20, 50);
-        doc.text(`Engine Capacity: ${capacity} cc`, 20, 56);
-        doc.text(`Tax Category: ${taxCategorySelect.options[taxCategorySelect.selectedIndex].text}`, 20, 62);
-        doc.text(`Exchange Rate: 1 JPY = ${yenrate} LKR`, 20, 68);
+        // Add decorative box with red border
+        doc.setDrawColor(...primaryRed);
+        doc.setFillColor(255, 250, 250); // Very light red background
+        doc.roundedRect(15, 73, 180, 30, 3, 3, 'F');
+        doc.roundedRect(15, 73, 180, 30, 3, 3, 'S');
         
-        // Cost Details Section
+        doc.setFontSize(11);
+        doc.setTextColor(black[0], black[1], black[2]);
+        doc.setFont("helvetica", "normal");
+        
+        // Vehicle info in two columns with icons (simulated)
+        doc.setFillColor(...primaryRed);
+        doc.circle(21, 81, 1.5, 'F'); // Red bullet
+        doc.text(`Vehicle Model: ${vehicle}`, 25, 82);
+        
+        doc.circle(21, 88, 1.5, 'F');
+        doc.text(`Year & Grade: ${vehicleYear} ${modelGrade}`, 25, 89);
+        
+        doc.circle(21, 95, 1.5, 'F');
+        doc.text(`Mileage: < ${mileage} km`, 25, 96);
+        
+        doc.circle(108, 81, 1.5, 'F');
+        doc.text(`Engine Capacity: ${capacity} cc`, 112, 82);
+        
+        doc.circle(108, 88, 1.5, 'F');
+        doc.text(`Auction Grade: ${auctionGrade}`, 112, 89);
+        
+        doc.circle(108, 95, 1.5, 'F');
+        doc.text(`Approximate Delivery: 8 - 10 Weeks`, 112, 96);
+        
+        let yPos = 115;
+        
+        // Cost Breakdown Section
         doc.setFontSize(14);
-        doc.setTextColor(26, 58, 143);
-        doc.text("COST BREAKDOWN", 20, 80);
+        doc.setTextColor(...darkRed);
+        doc.setFont("helvetica", "bold");
+        doc.text(`COST BREAKDOWN (Yen Rate: ${yenrate} LKR)`, 15, yPos);
+        yPos += 5;
         
-        // Create a table for costs
-        let yPos = 88;
+        // Create table header
+        doc.setFillColor(...darkRed);
+        doc.roundedRect(15, yPos, 180, 8, 2, 2, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(11);
+        doc.text("Description", 25, yPos + 5.5);
+        doc.text("Amount", 175, yPos + 5.5, null, null, 'right');
+        yPos += 12;
         
         // Helper function to add table rows
-        function addRow(label, value, isYen = false, isLKR = false) {
-            const formattedValue = isYen ? `¥${parseInt(value).toLocaleString()}` : 
-                             isLKR ? `LKR ${parseInt(value).toLocaleString()}` : 
-                             `LKR ${parseInt(value).toLocaleString()}`;
+        function addCostRow(description, amount, isYen = false, isHighlight = false) {
+            if (isHighlight) {
+                doc.setFillColor(255, 250, 250);
+                doc.rect(15, yPos, 180, 8, 'F');
+            }
             
+            doc.setDrawColor(230, 230, 230);
+            doc.setLineWidth(0.2);
+            doc.line(15, yPos, 195, yPos);
+            
+            doc.setTextColor(black[0], black[1], black[2]);
+            doc.setFont("helvetica", isHighlight ? "bold" : "normal");
             doc.setFontSize(10);
-            doc.setTextColor(0, 0, 0);
-            doc.text(label, 20, yPos);
             
-            doc.setFontSize(10);
-            doc.setTextColor(isYen ? 211 : (isLKR ? 26 : 0), 
-                           isYen ? 47 : (isLKR ? 143 : 0), 
-                           isYen ? 38 : (isLKR ? 74 : 0));
-            doc.text(formattedValue, 150, yPos, null, null, 'right');
+            // Add description with bullet
+            if (!isHighlight) {
+                doc.setFillColor(...primaryRed);
+                doc.circle(25, yPos + 4.5, 1, 'F');
+            }
+            doc.text(description, 29, yPos + 5.5);
             
-            yPos += 6;
+            // Format amount
+            const formattedAmount = isYen ? 
+                `¥${parseInt(amount).toLocaleString()}` : 
+                `LKR ${parseInt(amount).toLocaleString()}`;
+            
+            doc.setTextColor(isYen ? darkRed[0] : darkGray[0], 
+                           isYen ? darkRed[1] : darkGray[1], 
+                           isYen ? darkRed[2] : darkGray[2]);
+            doc.text(formattedAmount, 175, yPos + 5.5, null, null, 'right');
+            
+            yPos += 8;
         }
         
         // Add all cost items
-        addRow('Winning Bid', winningBid, true);
-        addRow('Shipping Charges', shipping, true);
-        addRow('Handling Charges', handling, true);
-        addRow('TT Deduction', -TT, true);
-        addRow('Area Cost', AreaCost, true);
-        addRow('CIF Value (JPY)', cif, true);
-        addRow('Auction Fee', auctionFee, false, true);
-        addRow('CIF (LKR) - LC Amount', lkrCif, false, true);
-        addRow('Bank Commission', bankCommission, false, true);
-        addRow('TT Amount (LKR)', lkrTT, false, true);
-        addRow('Clearing Charges', clearing, false, true);
+        addCostRow('Winning Bid', winningBid, true);
+        // addCostRow('Shipping Charges', shipping, true);
+        addCostRow('Handling and Shipping Charges', handling+shipping, true);
+        addCostRow('Area Cost', AreaCost, true);
+        addCostRow('CIF Discount', -TT, true);
+        addCostRow('CIF Value (JPY)', cif, true);
         yPos += 2;
+        
+        addCostRow('Auction Deposit and Insurance', auctionFee + lkrTT, false);
+        addCostRow('CIF (LKR) - LC Amount', lkrCif, false);
+        addCostRow('Bank Commission', bankCommission, false);
+        // addCostRow('CIF Discount (LKR)', lkrTT, false);
+        addCostRow('Clearing Charges', clearing, false);
+        yPos += 5;
         
         // Tax Breakdown Section
         // doc.setFontSize(14);
-        // doc.setTextColor(26, 58, 143);
-        // doc.text("TAX BREAKDOWN", 20, yPos + 10);
-        // yPos += 18;
+        // doc.setTextColor(...darkRed);
+        // doc.setFont("helvetica", "bold");
+        // doc.text("TAX BREAKDOWN", 15, yPos);
+        // yPos += 10;
         
         // // Add tax items
         // for (const [key, value] of Object.entries(taxDetails.taxComponents)) {
         //     const taxName = formatTaxName(key);
-        //     addRow(taxName, value, false, true);
+        //     addCostRow(taxName, value, false);
         // }
         
-        // // Totals
-        // yPos += 10;
-        // doc.setDrawColor(26, 58, 143);
-        // doc.setLineWidth(0.3);
-        // doc.line(20, yPos, 190, yPos);
-        // yPos += 8;
+        // Total Tax (highlighted)
+        addCostRow('TOTAL CUSTOMS TAX', totalTax, false, true);
+        yPos += 8;
         
-        // Total Tax
-        doc.setFontSize(12);
-        doc.setTextColor(26, 58, 143);
-        doc.text('Total Tax (LKR):', 20, yPos);
-        doc.setTextColor(26, 58, 143);
-        doc.text(`LKR ${parseInt(totalTax).toLocaleString()}`, 150, yPos, null, null, 'right');
+        // Final Total Amount Payable
+        doc.setFillColor(...darkRed);
+        doc.roundedRect(15, yPos, 180, 22, 3, 3, 'F');
         
-        yPos += 20;
-        
-        // Total Payable
+        doc.setTextColor(255, 255, 255);
+        doc.setFont("helvetica", "bold");
         doc.setFontSize(16);
-        doc.setTextColor(26, 143, 74);
-        doc.text('TOTAL AMOUNT PAYABLE:', 20, yPos);
-        doc.text(`LKR ${parseInt(totalLKR).toLocaleString()}`, 150, yPos, null, null, 'right');
+        doc.text("TOTAL AMOUNT PAYABLE", 105, yPos + 8, null, null, 'center');
         
-        // Footer
+        doc.setFontSize(20);
+        doc.setTextColor(255, 215, 0); // Gold color for total
+        doc.text(`LKR ${parseInt(totalLKR).toLocaleString()}`, 105, yPos + 17, null, null, 'center');
+        
+        yPos += 45;
+        
+        // Footer section
+        doc.setDrawColor(...primaryRed);
+        doc.setLineWidth(0.5);
+        doc.line(15, yPos, 195, yPos);
+        yPos += 8;
+        
+        doc.setFontSize(9);
+        doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
+        doc.setFont("helvetica", "normal");
+        
+        // Disclaimer
         doc.setFontSize(8);
-        doc.setTextColor(100, 100, 100);
-        doc.text("© 2025 Vehicle Import Calculator | Calculations are for reference purposes only", 105, 275, null, null, 'center');
-        doc.text("Exchange rates and tax regulations may vary", 105, 280, null, null, 'center');
-        doc.text("DNM Auto | 077 847 2900 | 071 346 6099", 105, 285, null, null, 'center');
+        doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
+        doc.text("This quotation is valid for 7 days from the date of issue.", 105, yPos, null, null, 'center');
+        doc.text("Prices are subject to change based on exchange rate fluctuations and government tax revisions.", 105, yPos + 4, null, null, 'center');
+        doc.text("© 2025 DNM AUTO. All rights reserved.", 105, yPos + 8, null, null, 'center');
         
+        // Page number
         // Save the PDF
-        doc.save(`Vehicle_Import_${vehicle.replace(/\s+/g, '_')}_${new Date().getTime()}.pdf`);
+        const fileName = `DNM_${vehicle.replace(/\s+/g, '_')}_Quotation_${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}.pdf`;
+        doc.save(fileName);
         
     } catch (error) {
         alert(`Error generating PDF: ${error.message}`);
@@ -875,14 +1102,534 @@ function generatePDF() {
     }
 }
 
+// Vehicle default settings mapping
+const vehicleDefaults = {
+    // ¥103,000 category
+    "Wagon R": [{ 
+        label: "HYBRID ZX", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1736900, 
+        capacity: 660, 
+        winningBid: 1500000 
+    },{
+        label: "ZL", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1457500, 
+        capacity: 660, 
+        winningBid: 1445000 
+    },{
+        label: "CUSTOM ZX", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1551000, 
+        capacity: 660, 
+        winningBid: 1400000 
+    },{
+        label: "HYBRID FX-S", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1200000, 
+        capacity: 660, 
+        winningBid: 1150000 
+    },{
+        label: "PETROL FX", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1150000, 
+        capacity: 660, 
+        winningBid: 1000000 
+    }],
+
+    "Alto": [{ 
+        label: "A", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1142900, 
+        capacity: 660, 
+        winningBid: 850000 
+    },{
+        label: "L", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1197900, 
+        capacity: 660, 
+        winningBid: 850000 
+    },{
+        label: "L Upgrade", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1379400, 
+        capacity: 660, 
+        winningBid: 950000 
+    },{
+        label: "HYBRID S", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1350800, 
+        capacity: 660, 
+        winningBid: 950000 
+    },{
+        label: "HYBRID X", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1519100, 
+        capacity: 660, 
+        winningBid: 1000000 
+    }],
+
+    "Mira": [{ 
+        label: "G SA3", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1320000, 
+        capacity: 660, 
+        winningBid: 1250000 
+    },{
+        label: "X SA3", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1179200, 
+        capacity: 660, 
+        winningBid: 1000000 
+    },{
+        label: "L SA3", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1025200, 
+        capacity: 660, 
+        winningBid: 850000 
+    },{
+        label: "B SA3", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 992200, 
+        capacity: 660, 
+        winningBid: 750000 
+    }],
+
+    "Move": [{ 
+        label: "L", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1358500, 
+        capacity: 660, 
+        winningBid: 1000000 
+    },{
+        label: "X", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1490500, 
+        capacity: 660, 
+        winningBid: 1250000 
+    },{
+        label: "G", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1716000, 
+        capacity: 660, 
+        winningBid: 1300000 
+    },{
+        label: "RS", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1897500, 
+        capacity: 660, 
+        winningBid: 1550000 
+    }],
+
+    "Nissan Dayz": [{ 
+        label: "S", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1437700, 
+        capacity: 660, 
+        winningBid: 950000 
+    },{
+        label: "X", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1478400, 
+        capacity: 660, 
+        winningBid: 1250000 
+    },{
+        label: "Highway Star X", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1698400, 
+        capacity: 660, 
+        winningBid: 1300000 
+    },{
+        label: "Highway Star X ProPilot Edition", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1798500, 
+        capacity: 660, 
+        winningBid: 1550000 
+    },{
+        label: "Highway Star G Turbo", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1838100, 
+        capacity: 660, 
+        winningBid: 1300000 
+    },{
+        label: "Highway Star G Turbo ProPilot Edition", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1929400, 
+        capacity: 660, 
+        winningBid: 1550000 
+    }],
+
+    "EK Wagon": [{ 
+        label:"M", 
+        taxCategory:"petrol_under_1000", 
+        taxbase:"1468500", 
+        capacity: 660, 
+        winningBid:"900000" 
+    },{
+        label:"G", 
+        taxCategory:"petrol_under_1000", 
+        taxbase:"1551000", 
+        capacity: 660, 
+        winningBid:"1100000"
+    }],
+
+    "Yaris": [{ 
+        label: "X 1.0L", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1657700, 
+        capacity: 996, 
+        winningBid: 1450000 
+    },{
+        label: "G 1.0L", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1820500, 
+        capacity: 996, 
+        winningBid: 1600000
+    }],
+
+    "TAFT": [{ 
+        label: "X", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1419000, 
+        capacity: 660, 
+        winningBid: 1100000 
+    },{
+        label: "X Turbo", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1512500, 
+        capacity: 660, 
+        winningBid: 1250000 
+    },{
+        label: "G", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1606000, 
+        capacity: 660, 
+        winningBid: 1300000 
+    },{
+        label: "G 'Chrome Venture'", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1672000, 
+        capacity: 660, 
+        winningBid: 1450000 
+    },{
+        label: "G 'Dark Chrome Venture'", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1677500, 
+        capacity: 660, 
+        winningBid: 1450000 
+    },{
+        label: "G Turbo", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1688500, 
+        capacity: 660, 
+        winningBid: 1450000 
+    },{
+        label: "G Turbo 'Chrome Venture'", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1754500, 
+        capacity: 660, 
+        winningBid: 1500000 
+    },{
+        label: "G Turbo 'Dark Chrome Venture'", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1760000, 
+        capacity: 660, 
+        winningBid: 1500000 
+    }],
+    
+    // ¥109,000 category
+    "Fit HV": [{ 
+        label: "Basic",
+        taxCategory: "hybrid_1300_1500", 
+        taxbase: 2208800, 
+        capacity: 1496, 
+        winningBid: 1300000 
+    },{ 
+        label: "Home",
+        taxCategory: "hybrid_1300_1500", 
+        taxbase: 2404600, 
+        capacity: 1496, 
+        winningBid: 1620000 
+    },{ 
+        label: "RS",
+        taxCategory: "hybrid_1300_1500", 
+        taxbase: 2616900, 
+        capacity: 1496, 
+        winningBid: 1800000 
+    },{ 
+        label: "Crosstar",
+        taxCategory: "hybrid_1300_1500", 
+        taxbase: 2710400, 
+        capacity: 1496, 
+        winningBid: 1800000 
+    },{ 
+        label: "LUXE",
+        taxCategory: "hybrid_1300_1500", 
+        taxbase: 2719200, 
+        capacity: 1496, 
+        winningBid: 2000000 
+    }],
+
+    "X bee": [{ 
+        label: "Hybrid MX",
+        taxCategory: "petrol_under_1000", 
+        taxbase: 2212100, 
+        capacity: 996, 
+        winningBid: 1600000 
+    },{ 
+        label: "Hybrid MZ",
+        taxCategory: "petrol_under_1000", 
+        taxbase: 2388100, 
+        capacity: 996, 
+        winningBid: 1700000 
+    }],
+
+    "Hustler": [{ 
+        label: "Hybrid G",
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1518000, 
+        capacity: 660, 
+        winningBid: 1400000 
+    }, { 
+        label: "Hybrid X",
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1672000, 
+        capacity: 660, 
+        winningBid: 1500000 
+    }],
+
+    "Aqua": [{ 
+        label: "X",
+        taxCategory: "hybrid_1300_1500", 
+        taxbase: 2486000, 
+        capacity: 1496, 
+        winningBid: 1700000 
+    },{ 
+        label: "G",
+        taxCategory: "hybrid_1300_1500", 
+        taxbase: 2654300, 
+        capacity: 1496, 
+        winningBid: 2000000 
+    },{ 
+        label: "Z",
+        taxCategory: "hybrid_1300_1500", 
+        taxbase: 2824800, 
+        capacity: 1496, 
+        winningBid: 2200000 
+    }],
+
+    "Swift": [{ 
+        label: "XG",
+        taxCategory: "petrol_1000_1300", 
+        taxbase: 1727000, 
+        capacity: 1196, 
+        winningBid: 1200000 
+    },{ 
+        label: "Hybrid MX",
+        taxCategory: "petrol_1000_1300", 
+        taxbase: 1922800, 
+        capacity: 1196, 
+        winningBid: 1450000 
+    }, { 
+        label: "Hybrid MZ",
+        taxCategory: "petrol_1000_1300", 
+        taxbase: 2167000, 
+        capacity: 1196, 
+        winningBid: 1700000 
+    }],
+
+    "Note": [{ 
+        label: "X 2WD",
+        taxCategory: "hybrid_1000_1300", 
+        taxbase: 2328700, 
+        capacity: 1196, 
+        winningBid: 1825000
+    }],
+    
+    // ¥114,000 category
+    "Raize": [{
+        label: "X 1.0L",
+        taxCategory: "petrol_under_1000",
+        taxbase: 1800700,
+        capacity: 996,
+        winningBid: 1800000
+    },{
+        label: "G 1.0L",
+        taxCategory: "petrol_under_1000",
+        taxbase: 1958000,
+        capacity: 996,
+        winningBid: 2000000
+    },{
+        label: "Z 1.0L",
+        taxCategory: "petrol_under_1000",
+        taxbase: 2152700,
+        capacity: 996,
+        winningBid: 2500000
+    },{
+        label: "G 1.2L HV",
+        taxCategory: "hev_50_100_1year",
+        taxbase: 2263800,
+        capacity: 78,
+        winningBid: 2100000
+    },{
+        label: "Z 1.2L HV",
+        taxCategory: "hev_50_100_1year",
+        taxbase: 2442000,
+        capacity: 78,
+        winningBid: 2500000
+    }],
+
+    "Rocky": [{
+        label: "L 1.0L",
+        taxCategory: "petrol_under_1000",
+        taxbase: 1761100,
+        capacity: 996,
+        winningBid: 1600000
+    },{
+        label: "X 1.0L",
+        taxCategory: "petrol_under_1000",
+        taxbase: 1910700,
+        capacity: 996,
+        winningBid: 1800000
+    },{
+        label: "Premium G 1.0L",
+        taxCategory: "petrol_under_1000",
+        taxbase: 2171400,
+        capacity: 996,
+        winningBid: 2000000
+    },{
+        label: "X HEV 1.2L",
+        taxCategory: "hev_50_100_1year",
+        taxbase: 2216500,
+        capacity: 78,
+        winningBid: 2100000
+    },{
+        label: "Premium G HEV 1.2L",
+        taxCategory: "hev_50_100_1year",
+        taxbase: 2460700,
+        capacity: 78,
+        winningBid: 2500000
+    }],
+
+    "Roomy": [{ 
+        label: "X", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1742400, 
+        capacity: 996, 
+        winningBid: 1250000 
+    },{
+        label: "Custom G", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 2118600, 
+        capacity: 996, 
+        winningBid: 1400000
+    },{
+        label: "Custom GT (Turbo)", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 2257200, 
+        capacity: 996, 
+        winningBid: 1600000
+    }],
+    
+    // ¥119,000 category
+    "Axio": [{ 
+        label: "EX", 
+        taxCategory: "petrol_1300_1500", 
+        taxbase: 2279200, 
+        capacity: 1496, 
+        winningBid: 1800000 
+    }, { 
+        label: "HYBRID EX", 
+        taxCategory: "hybrid_1300_1500", 
+        taxbase: 3077800, 
+        capacity: 1496, 
+        winningBid: 2500000 
+    }],
+
+    "Vezel HV": [{ 
+        label: "e:HEV X HuNT", 
+        taxCategory: "hybrid_1300_1500", 
+        taxbase: 3108600, 
+        capacity: 1496, 
+        winningBid: 2500000 
+    },{ 
+        label: "e:HEV Z", 
+        taxCategory: "hybrid_1300_1500", 
+        taxbase: 3268100, 
+        capacity: 1496, 
+        winningBid: 3000000 
+    },{
+        label: "e:HEV Z Play", 
+        taxCategory: "hybrid_1300_1500", 
+        taxbase: 3699300, 
+        capacity: 1496, 
+        winningBid: 3500000 
+    },{
+        label: "e:HEV RS", 
+        taxCategory: "hybrid_1300_1500", 
+        taxbase: 3748800, 
+        capacity: 1496, 
+        winningBid: 3400000 
+    }],
+
+    "Yaris Cross": [{ 
+        label: "Yaris Cross", 
+        taxCategory: "hybrid_1300_1500", 
+        taxbase: 129444, 
+        capacity: 1496, 
+        winningBid: 2800000 
+    }],
+    
+    // ¥135,000 category
+    "Leaf": [{ 
+        label: "Leaf", 
+        taxCategory: "hev_50_100_1year", 
+        taxbase: 135000, 
+        capacity: 60, 
+        winningBid: 1800000
+    }], // Electric - special category
+
+    "Honda WR-V": [{ 
+        label: "Honda WR-V", 
+        taxCategory: "petrol_1300_1500", 
+        taxbase: 135000, 
+        capacity: 1500, 
+        winningBid: 1900000 
+    }],
+
+    // ¥140,000 category
+    "Corolla cross": [{ 
+        label: "Corolla cross", 
+        taxCategory: "hybrid_1300_1500", 
+        taxbase: 144444, 
+        capacity: 1878, 
+        winningBid: 3500000 
+    }],
+
+    // ¥155,000 category
+    "CR-V": [{ 
+        label: "CR-V", 
+        taxCategory: "petrol_1300_1500", 
+        taxbase: 156666, 
+        capacity: 2000, 
+        winningBid: 2900000 
+    }],
+};
+
 // Event Listeners
 calculateBtn.addEventListener('click', calculateAndDisplay);
-document.addEventListener('DOMContentLoaded', updateVehicleDefaults);
-vehicleSelect.addEventListener('change', updateVehicleDefaults);
+document.addEventListener('DOMContentLoaded', updateVehicleVariants);
+vehicleSelect.addEventListener('change', updateVehicleVariants);
+vehicleVariantSelect.addEventListener('change', applyVehicleVariant);
 winningBidInput.addEventListener('input', calculateAndDisplay);
+areaCostInput.addEventListener('input', calculateAndDisplay);
+auctionFeeInput.addEventListener('input', calculateAndDisplay);
 ttInput.addEventListener('input', calculateAndDisplay);
 yenrateInput.addEventListener('input', calculateAndDisplay);
 clearingInput.addEventListener('input', calculateAndDisplay);
 capacityInput.addEventListener('input', calculateAndDisplay);
 taxCategorySelect.addEventListener('change', calculateAndDisplay); // NEW
+taxBaseInput.addEventListener('input', calculateAndDisplay);
+exporterSelect.addEventListener('change', calculateAndDisplay);
 downloadPdfBtn.addEventListener('click', generatePDF);
+

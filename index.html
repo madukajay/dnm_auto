@@ -8,185 +8,205 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <img id="companyLogo" src="logo.png" style="display: none;" alt="DNM Auto Logo">
 </head>
 <body>
     <div class="container">
         <header>
             <h1><i class="fas fa-car"></i> DNM AUTO Vehicle Import Cost Calculator</h1>
-            <p class="subtitle">Calculate total import costs for vehicles from Japan to Sri Lanka</p>
+            <p class="subtitle">Total import costs for vehicles from Japan to Sri Lanka</p>
         </header>
         
-        <div class="calculator-container">
-            <div class="input-section">
-                <h2 class="section-title"><i class="fas fa-edit"></i> Input Parameters</h2>
-                
-                <div class="input-group">
-                    <label for="vehicle"><i class="fas fa-car"></i> Vehicle Model</label>
-                    <select id="vehicle">
-                        <!-- ¥103,000 category -->
-                        <option value="Wagon R" selected>Wagon R</option>
-                        <option value="Alto">Alto</option>
-                        <option value="Mira">Mira</option>
-                        <option value="Move">Move</option>
-                        <option value="EK Wagon">EK Wagon</option>
-                        <option value="Yaris">Yaris</option>
-                        
-                        <!-- ¥109,000 category -->
-                        <option value="Fit HV">Fit HV</option>
-                        <option value="X bee">X bee</option>
-                        <option value="Hustler">Hustler</option>
-                        <option value="Aqua">Aqua</option>
-                        <option value="Swift">Swift</option>
-                        <option value="Note">Note</option>
-                        
-                        <!-- ¥114,000 category -->
-                        <option value="Raize">Raize</option>
-                        <option value="Rocky">Rocky</option>
-                        <option value="Roomy">Roomy</option>
-                        
-                        <!-- ¥119,000 category -->
-                        <option value="Fielder">Fielder</option>
-                        <option value="Axio">Axio</option>
-                        <option value="Other sedan">Other sedan</option>
-                        
-                        <!-- ¥124,000 category -->
-                        <option value="Sienta HV">Sienta HV</option>
-                        <option value="Freed HV">Freed HV</option>
-                        
-                        <!-- ¥129,000 category -->
-                        <option value="C-HR">C-HR</option>
-                        <option value="Vezel HV">Vezel HV</option>
-                        
-                        <!-- ¥135,000 category -->
-                        <option value="Leaf">Leaf</option>
-                        <option value="Honda WR-V">Honda WR-V</option>
-                        <option value="Audi Q3">Audi Q3</option>
-                        
-                        <!-- ¥140,000 category -->
-                        <option value="Corolla cross">Corolla cross</option>
-                        
-                        <!-- ¥145,000 category -->
-                        <option value="Eclips cross">Eclips cross</option>
-                        <option value="Honda ZR-V">Honda ZR-V</option>
-                        
-                        <!-- ¥150,000 category -->
-                        <option value="Voxy HV">Voxy HV</option>
-                        <option value="Noah HV">Noah HV</option>
-                        <option value="X-trail">X-trail</option>
-                        
-                        <!-- ¥155,000 category -->
-                        <option value="CR-V">CR-V</option>
-                        <option value="Step Wagon">Step Wagon</option>
-                        
-                        <!-- ¥166,000 category -->
-                        <option value="HIACE V">HIACE V</option>
-                        <option value="NISSAN CARAVAN">NISSAN CARAVAN</option>
-                        
-                        <!-- ¥176,000 category -->
-                        <option value="ALPHARD">ALPHARD</option>
-                        <option value="VELLFIRE">VELLFIRE</option>
-                        
-                        <!-- ¥186,000 category -->
-                        <option value="Land Cruiser Prado">Land Cruiser Prado</option>
-                    </select>
-                </div>
+        <div class="three-column-container">
+            <!-- Column 1: Input Parameters -->
+            <div class="input-column">
+                <div class="input-section">
+                    <h2 class="section-title"><i class="fas fa-edit"></i> Input Parameters</h2>
+                    
+                    <div class="input-group">
+                        <label for="vehicle"><i class="fas fa-car"></i> Vehicle Model</label>
+                        <select id="vehicle">
+                            <!-- ¥103,000 category -->
+                            <option value="Alto">Alto</option>
+                            <option value="EK Wagon">EK Wagon</option>
+                            <option value="Mira">Mira</option>
+                            <option value="Wagon R">Wagon R</option>
+                            <option value="Nissan Dayz">Nissan Dayz</option>
+                            <option value="Move">Move</option>
+                            <option value="TAFT">TAFT</option>
+                            <option value="Yaris">Yaris</option>
+                            
+                            <!-- ¥109,000 category -->
+                            <option value="Fit HV">Fit HV</option>
+                            <option value="X bee">X bee</option>
+                            <option value="Hustler">Hustler</option>
+                            <option value="Aqua">Aqua</option>
+                            <option value="Swift">Swift</option>
+                            <option value="Note">Note</option>
+                            
+                            <!-- ¥114,000 category -->
+                            <option value="Raize" selected>Raize</option>
+                            <option value="Rocky">Rocky</option>
+                            <option value="Roomy">Roomy</option>
+                            
+                            <!-- ¥119,000 category -->
+                            <!-- <option value="Axio">Axio</option> -->
+                            
+                            <!-- ¥129,000 category -->
+                            <option value="C-HR">C-HR</option>
+                            <option value="Vezel HV">Vezel HV</option>
+                            <option value="Yaris Cross">Yaris Cross</option>
+                            
+                            <!-- ¥135,000 category -->
+                            <option value="Leaf">Leaf</option>
+                            <option value="Honda WR-V">Honda WR-V</option>
+                            
+                            <!-- ¥140,000 category -->
+                            <option value="Corolla cross">Corolla cross</option>
+                            
+                            <!-- ¥155,000 category -->
+                            <option value="CR-V">CR-V</option>
 
-                <div class="input-group">
-                    <label for="taxcategory"><i class="fas fa-car"></i> Tax Category</label>
-                    <select id="taxcategory">
-                        <option value="hybrid_under_1000">-- &lt;1000cc Hybrid</option>
-                        <option value="petrol_under_1000">-- &lt;1000cc Petrol</option>
-                        <option value="hybrid_1000_1300">1000cc &lt; -- &lt;1300cc Hybrid</option>
-                        <option value="petrol_1000_1300">1000cc &lt; -- &lt;1300cc Petrol</option>
-                        <option value="hybrid_1300_1500">1300cc &lt; -- &lt;1500cc Hybrid</option>
-                        <option value="petrol_1300_1500" selected>1300cc &lt; -- &lt;1500cc Petrol</option>
-                        <option value="hev_50_100_1year">50kW &lt; -- &lt;100kW HEV (&lt;1 Year)</option>
-                        <option value="hev_50_100_3year" selected>50kW &lt; -- &lt;100kW HEV (&gt;1 Year)</option>
-                    </select>
-                </div>
-
-                <div class="input-group">
-                    <label for="capacity"><i class="fas fa-gavel"></i> Engine Capacity (cc)</label>
-                    <input type="number" id="capacity" value="660" min="0" step="1">
-                </div>
-                
-                <div class="input-group">
-                    <label for="winningBid"><i class="fas fa-gavel"></i> Winning Bid (JPY)</label>
-                    <input type="number" id="winningBid" value="2000000" min="0" step="10000">
-                </div>
-                
-                <div class="input-group">
-                    <label for="ff"><i class="fas fa-yen-sign"></i> TT Deduction (JPY)</label>
-                    <input type="number" id="tt" value="70000" min="0" step="10000">
-                </div>
-                
-                <div class="input-group">
-                    <label for="yenrate"><i class="fas fa-exchange-alt"></i> JPY to LKR Exchange Rate</label>
-                    <input type="number" id="yenrate" value="2.0" min="0.1" step="0.1">
-                </div>
-                
-                <div class="input-group">
-                    <label for="clearing"><i class="fas fa-truck-loading"></i> Clearing Charges (LKR)</label>
-                    <input type="number" id="clearing" value="100000" min="0" step="10000">
-                </div>
-                
-                <button class="calculate-btn" id="calculateBtn">
-                    <i class="fas fa-calculator"></i> Calculate Import Cost
-                </button>
-
-                <button class="download-btn" id="downloadPdfBtn">
-                    <i class="fas fa-download"></i> Download as PDF
-                </button>
-                
-                <div class="note">
-                    <p><i class="fas fa-info-circle"></i> <strong>Note:</strong> Area Cost is fixed at ¥5,000. Handling and auction fees are calculated automatically based on the winning bid.</p>
-                </div>
-            </div>
-            
-            <div class="results-section">
-                <h2 class="section-title"><i class="fas fa-chart-line"></i> Cost Breakdown</h2>
-                
-                <div id="vehicleInfo" class="vehicle-info">
-                    <div>
-                        <span class="vehicle-model">Vezel</span>
-                        <div>Shipping: <span class="vehicle-shipping">¥129,000</span></div>
+                        </select>
                     </div>
-                    <div>
-                        <div>Model Code: <strong>6</strong></div>
+
+                    <div class="input-group">
+                        <label for="vehicle"><i class="fas fa-car"></i> Grade</label>
+                        <select id="vehicleVariant"></select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="taxcategory"><i class="fas fa-hand-holding-usd"></i> Tax Category</label>
+                        <select id="taxcategory">
+                            <option value="hybrid_under_1000">-- &lt;1000cc Hybrid</option>
+                            <option value="petrol_under_1000">-- &lt;1000cc Petrol</option>
+                            <option value="hybrid_1000_1300">1000cc &lt; -- &lt;1300cc Hybrid</option>
+                            <option value="petrol_1000_1300">1000cc &lt; -- &lt;1300cc Petrol</option>
+                            <option value="hybrid_1300_1500">1300cc &lt; -- &lt;1500cc Hybrid</option>
+                            <option value="petrol_1300_1500" selected>1300cc &lt; -- &lt;1500cc Petrol</option>
+                            <option value="hev_50_100_1year">50kW &lt; -- &lt;100kW HEV (&lt;1 Year)</option>
+                            <option value="hev_50_100_3year">50kW &lt; -- &lt;100kW HEV (&gt;1 Year)</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="taxbase"><i class="fas fa-gavel"></i> A/V FOB (JPY)</label>
+                        <input type="number" id="taxbase" value="1000" min="0" step="1">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="exporter"><i class="fas fa-ship"></i> Exporter </label>
+                        <select id="exporter">
+                            <option value="1">A</option>
+                            <option value="2">B</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="capacity"><i class="fas fa-gavel"></i> Engine (cc)</label>
+                        <input type="number" id="capacity" value="660" min="0" step="1">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="winningBid"><i class="fas fa-gavel"></i> Bid (JPY)</label>
+                        <input type="number" id="winningBid" value="2000000" min="0" step="10000">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="areaCost"><i class="fas fa-gavel"></i> Area Cost (JPY)</label>
+                        <input type="number" id="areaCost" value="5000" min="0" step="1000">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="auctionFee"><i class="fas fa-gavel"></i> Auc Deposit (LKR)</label>
+                        <input type="number" id="auctionFee" value="300000" min="0" step="10000">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="ff"><i class="fas fa-yen-sign"></i> TT (JPY)</label>
+                        <input type="number" id="tt" value="70000" min="0" step="10000">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="yenrate"><i class="fas fa-exchange-alt"></i> JPY Rate</label>
+                        <input type="number" id="yenrate" value="2.0" min="0.1" step="0.1">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="clearing"><i class="fas fa-truck-loading"></i> Clearing (LKR)</label>
+                        <input type="number" id="clearing" value="100000" min="0" step="10000">
+                    </div>
+                    
+                    <button class="calculate-btn" id="calculateBtn">
+                        <i class="fas fa-calculator"></i> Calculate Import Cost
+                    </button>
+
+                    <button class="download-btn" id="downloadPdfBtn">
+                        <i class="fas fa-download"></i> Download as PDF
+                    </button>
+
+                    <div class="note">
+                        <p><i class="fas fa-info-circle"></i> <strong>Note:</strong> All tax calculations are based on current Sri Lankan import regulations. Exchange rates and tax regulations may vary. </p>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <!-- Column 2: Cost Breakdown -->
+            <div class="results-column">
+                <div class="results-section">
+                    <h2 class="section-title"><i class="fas fa-chart-line"></i> Cost Breakdown</h2>
+                    
+                    <div id="vehicleInfo" class="vehicle-info">
+                        <div>
+                            <span class="vehicle-model">Raize</span>
+                            <div>Shipping: <span class="vehicle-shipping">¥103,000</span></div>
+                        </div>
+                        <div>
+                            <div>Model Code: <strong>1</strong></div>
+                        </div>
+                    </div>
+                    
+                    <div class="results-container" id="resultsContainer">
+                        <!-- Results will be populated here by JavaScript -->
+                    </div>
+                    
+                    <!-- Total Amount Payable moved here -->
+                    <div class="total-payable-container" id="totalPayableContainer">
+                        <div class="total-payable" id="totalPayable">
+                            <span>Total Amount Payable:</span>
+                            <span>LKR 0</span>
+                        </div>
                     </div>
                 </div>
-                
-                <div class="results-container" id="resultsContainer">
-                    <!-- Results will be populated here by JavaScript -->
+            </div>
+            
+            <!-- Column 3: Tax Breakdown -->
+            <div class="tax-column">
+                <div class="tax-section">
+                    <h2 class="section-title"><i class="fas fa-receipt"></i> Tax Breakdown</h2>
+                    
+                    <div class="tax-breakdown" id="taxBreakdown">
+                        <!-- Tax breakdown will be populated here by JavaScript -->
+                    </div>
+                    
+                    <div class="total-tax" id="totalTax">
+                        <span>Total Tax (LKR):</span>
+                        <span>LKR 0</span>
+                    </div>
+                    
+                    <div class="summary-section">
+                        <h3 class="summary-title"><i class="fas fa-info-circle"></i> Summary</h3>
+                        <div class="summary" id="summaryDetails">
+                            <!-- Summary will be populated here by JavaScript -->
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="total-payable" id="totalPayable">
-                    <span>Total Amount Payable:</span>
-                    <span>LKR 0</span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="breakdown-section">
-            <h2 class="breakdown-title"><i class="fas fa-receipt"></i> Tax Breakdown</h2>
-            
-            <div class="tax-breakdown" id="taxBreakdown">
-                <!-- Tax breakdown will be populated here by JavaScript -->
-            </div>
-            
-            <div class="total-tax" id="totalTax">
-                <span>Total Tax (LKR):</span>
-                <span>LKR 0</span>
-            </div>
-            
-            <div class="summary" id="summaryDetails">
-                <!-- Summary will be populated here by JavaScript -->
             </div>
         </div>
         
         <footer>
-            <p>Vehicle Import Cost Calculator | Calculations are for reference purposes only | Exchange rates and tax regulations may vary</p>
-            <p>© 2025 Vehicle Import Calculator | All tax calculations based on current Sri Lankan import regulations</p>
+            <p>© 2025 Vehicle Import Cost Calculator | Calculations are for reference purposes only</p>
         </footer>
     </div>
 
