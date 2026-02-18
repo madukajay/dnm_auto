@@ -285,6 +285,39 @@ function calculateVehicleTax(fob, shipping, taxCategory, capacity) {
             luxuryThreshold: 5000000,
             luxuryRate: 1.0 // 100%
         },
+        // 1500cc < -- <1600cc Hybrid [HS Code: 8703.40.51]
+        'hybrid_1500_1600': {
+            getExciseDuty: (capacity) => {
+                return capacity * 4800;
+            },
+            cidRate: 0.20, // 20%
+            surchargeRate: 0.50, // 50% of CID
+            vatRate: 0.18, // 18%
+            luxuryThreshold: 5500000,
+            luxuryRate: 0.8 // 80%
+        },
+        // 1600cc < -- <1800cc Hybrid [HS Code: 8703.40.53]
+        'hybrid_1600_1800': {
+            getExciseDuty: (capacity) => {
+                return capacity * 6300;
+            },
+            cidRate: 0.20, // 20%
+            surchargeRate: 0.50, // 50% of CID
+            vatRate: 0.18, // 18%
+            luxuryThreshold: 5500000,
+            luxuryRate: 0.8 // 80%
+        },
+        // 1800cc < -- <2000cc Hybrid [HS Code: 8703.40.58]
+        'hybrid_1800_2000': {
+            getExciseDuty: (capacity) => {
+                return capacity * 6900;
+            },
+            cidRate: 0.20, // 20%
+            surchargeRate: 0.50, // 50% of CID
+            vatRate: 0.18, // 18%
+            luxuryThreshold: 5500000,
+            luxuryRate: 0.8 // 80%
+        },
         // HEV 50kW < -- < 100kW not more than 1yr old [HS Code: 8703.80.73]
         'hev_50_100_1year': {
             getExciseDuty: (capacity) => {
@@ -329,12 +362,16 @@ function calculateVehicleTax(fob, shipping, taxCategory, capacity) {
     // Calculate Surcharge - category-specific rate
     const surcharge = cid * category.surchargeRate;
 
-    // Calculate VAT base (CIF * 1.1 + excise duty + cid + surcharge)
-    const vatBase = (cif * 1.1) + exciseDuty + cid + surcharge;
+    // Calculate SSCL base (CIF * 1.1 + excise duty + cid + surcharge)
+    const ssclBase = (cif * 1.1) + exciseDuty + cid + surcharge;
+    const sscl = ssclBase * 0.025; // SSCL at 2.5% of the base
+
+    // Calculate VAT base (SSCL base + SSCL) and then VAT at category-specific rate
+    const vatBase = ssclBase + sscl;
     const vat = vatBase * category.vatRate;
 
     // Calculate total tax
-    const totalTax = luxuryTax + exciseDuty + cid + surcharge + vat + VEL + COM;
+    const totalTax = luxuryTax + exciseDuty + cid + surcharge + sscl + vat + VEL + COM;
 
     // Return detailed breakdown
     return {
@@ -347,6 +384,7 @@ function calculateVehicleTax(fob, shipping, taxCategory, capacity) {
             exciseDuty: parseFloat(exciseDuty.toFixed(2)),
             cid: parseFloat(cid.toFixed(2)),
             surcharge: parseFloat(surcharge.toFixed(2)),
+            sscl: parseFloat(sscl.toFixed(2)),
             vat: parseFloat(vat.toFixed(2)),
             vel: VEL,
             com: COM,
@@ -375,7 +413,7 @@ function getShippingCharges(input) {
         3: { models: ["Raize", "Rocky", "Roomy"], charge: 114000 },
         
         // ¥119,000 category
-        4: { models: ["Fielder", "Axio", "Other sedan"], charge: 119000 },
+        4: { models: ["Fielder", "Axio", "Audi A3", "Other sedan"], charge: 119000 },
         
         // ¥124,000 category
         5: { models: ["Sienta HV", "Freed HV"], charge: 124000 },
@@ -643,6 +681,7 @@ function formatTaxName(key) {
         exciseDuty: 'Excise Duty',
         cid: 'CID (20% of CIF)',
         surcharge: 'SUR (50% of CID)',
+        sscl: 'SSCL (2.5%)',
         vat: 'VAT (18%)',
         vel: 'Vehicle Emission Levy',
         com: 'COM/EXM/SEL',
@@ -1450,19 +1489,19 @@ const vehicleDefaults = {
     "Raize": [{
         label: "X 1.0L",
         taxCategory: "petrol_under_1000",
-        taxbase: 1800700,
+        taxbase: 2079000,
         capacity: 996,
         winningBid: 1800000
     },{
         label: "G 1.0L",
         taxCategory: "petrol_under_1000",
-        taxbase: 1958000,
+        taxbase: 2235200,
         capacity: 996,
         winningBid: 2000000
     },{
         label: "Z 1.0L",
         taxCategory: "petrol_under_1000",
-        taxbase: 2152700,
+        taxbase: 2413400,
         capacity: 996,
         winningBid: 2500000
     },{
@@ -1482,19 +1521,19 @@ const vehicleDefaults = {
     "Rocky": [{
         label: "L 1.0L",
         taxCategory: "petrol_under_1000",
-        taxbase: 1761100,
+        taxbase: 2039400,
         capacity: 996,
         winningBid: 1600000
     },{
         label: "X 1.0L",
         taxCategory: "petrol_under_1000",
-        taxbase: 1910700,
+        taxbase: 2187900,
         capacity: 996,
         winningBid: 1800000
     },{
         label: "Premium G 1.0L",
         taxCategory: "petrol_under_1000",
-        taxbase: 2171400,
+        taxbase: 2432100,
         capacity: 996,
         winningBid: 2000000
     },{
@@ -1539,11 +1578,19 @@ const vehicleDefaults = {
         capacity: 1496, 
         winningBid: 1800000 
     }, { 
-        label: "HYBRID EX", 
+        label: "HYBRID EX (NKE165)", 
         taxCategory: "hybrid_1300_1500", 
-        taxbase: 3077800, 
+        taxbase: 2176900, 
         capacity: 1496, 
         winningBid: 2500000 
+    }],
+
+    "Audi A3": [{ 
+        label: "TFSI Adv (3AA-GYDLA)", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 3869800, 
+        capacity: 999, 
+        winningBid: 2300000 
     }],
 
     "Vezel HV": [{ 
@@ -1573,13 +1620,37 @@ const vehicleDefaults = {
     }],
 
     "Yaris Cross": [{ 
-        label: "Yaris Cross", 
+        label: "X", 
         taxCategory: "hybrid_1300_1500", 
-        taxbase: 129444, 
+        taxbase: 2433200, 
+        capacity: 1496, 
+        winningBid: 2000000 
+    },{ 
+        label: "G", 
+        taxCategory: "hybrid_1300_1500", 
+        taxbase: 2546500, 
+        capacity: 1496, 
+        winningBid: 2250000 
+    },{ 
+        label: "Z", 
+        taxCategory: "hybrid_1300_1500", 
+        taxbase: 2887500, 
+        capacity: 1496, 
+        winningBid: 2500000 
+    },{ 
+        label: "Z URBANO", 
+        taxCategory: "hybrid_1300_1500", 
+        taxbase: 2997500, 
+        capacity: 1496, 
+        winningBid: 2650000 
+    },{ 
+        label: "Z Adventure", 
+        taxCategory: "hybrid_1300_1500", 
+        taxbase: 3003000, 
         capacity: 1496, 
         winningBid: 2800000 
     }],
-    
+
     // ¥135,000 category
     "Leaf": [{ 
         label: "Leaf", 
@@ -1599,11 +1670,23 @@ const vehicleDefaults = {
 
     // ¥140,000 category
     "Corolla cross": [{ 
-        label: "Corolla cross", 
-        taxCategory: "hybrid_1300_1500", 
-        taxbase: 144444, 
-        capacity: 1878, 
-        winningBid: 3500000 
+        label: "G", 
+        taxCategory: "hybrid_1600_1800", 
+        taxbase: 2760000, 
+        capacity: 1796, 
+        winningBid: 2500000
+    },{ 
+        label: "S", 
+        taxCategory: "hybrid_1600_1800", 
+        taxbase: 2980000, 
+        capacity: 1796, 
+        winningBid: 2700000
+    },{ 
+        label: "Z", 
+        taxCategory: "hybrid_1600_1800", 
+        taxbase: 3430000, 
+        capacity: 1796, 
+        winningBid: 3000000
     }],
 
     // ¥155,000 category
