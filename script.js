@@ -404,7 +404,7 @@ function getShippingCharges(input) {
     // Model to price mapping
     const shippingRates = {
         // ¥103,000 category
-        1: { models: ["Alto", "Mira", "EK Wagon", "Wagon R", "Move", "Nissan Dayz", "TAFT", "Yaris"], charge: 103000 },
+        1: { models: ["Alto", "Mira", "EK Wagon", "Wagon R", "Move", "Nissan Dayz", "ROOX", "TAFT", "Yaris"], charge: 103000 },
         
         // ¥109,000 category
         2: { models: ["Fit HV", "X bee", "Hustler", "Aqua", "Swift", "Note"], charge: 109000 },
@@ -751,7 +751,7 @@ function calculateAndDisplay() {
         const fob = winningBid + handling + AreaCost - TT;
         const cif = fob + shipping;
         const lkrCif = cif * yenrate;
-        const bankCommission = lkrCif * 0.005;
+        const bankCommission = lkrCif * 0.01; // Assuming 1% bank commission
         const LC = lkrCif + bankCommission;
         const lkrTT = TT * (yenrate + 0.01);
 
@@ -908,7 +908,7 @@ function generatePDF() {
         const fob = winningBid + handling + AreaCost - TT;
         const cif = fob + shipping;
         const lkrCif = cif * yenrate;
-        const bankCommission = lkrCif * 0.005;
+        const bankCommission = lkrCif * 0.01; // Assuming 1% bank commission
         const LC = lkrCif + bankCommission;
         const lkrTT = TT * (yenrate + 0.01);
         const taxDetails = calculateVehicleTax(fob, shipping, taxCategory, capacity);
@@ -1298,6 +1298,44 @@ const vehicleDefaults = {
         winningBid: 1550000 
     }],
 
+    "ROOX": [{ 
+        label: "S", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1672000, 
+        capacity: 660, 
+        winningBid: 950000 
+    },{
+        label: "X", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1739100, 
+        capacity: 660, 
+        winningBid: 1150000 
+    },{
+        label: "Highway Star X", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1919500, 
+        capacity: 660, 
+        winningBid: 1300000 
+    },{
+        label: "Highway Star X ProPilot Edition", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 2105400, 
+        capacity: 660, 
+        winningBid: 1550000 
+    },{
+        label: "Highway Star G Turbo", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 2159300, 
+        capacity: 660, 
+        winningBid: 1300000 
+    },{
+        label: "Highway Star G Turbo ProPilot Edition", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 2249500, 
+        capacity: 660, 
+        winningBid: 1550000 
+    }],
+
     "EK Wagon": [{ 
         label:"M", 
         taxCategory:"petrol_under_1000", 
@@ -1556,6 +1594,12 @@ const vehicleDefaults = {
         taxbase: 1742400, 
         capacity: 996, 
         winningBid: 1250000 
+    },{
+        label: "G", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1939300, 
+        capacity: 996, 
+        winningBid: 1300000
     },{
         label: "Custom G", 
         taxCategory: "petrol_under_1000", 
