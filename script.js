@@ -364,7 +364,7 @@ function calculateVehicleTax(fob, shipping, taxCategory, capacity) {
 
     // Calculate SSCL base (CIF * 1.1 + excise duty + cid + surcharge)
     const ssclBase = (cif * 1.1) + exciseDuty + cid + surcharge;
-    const sscl = ssclBase * 0.025; // SSCL at 2.5% of the base
+    const sscl = ssclBase * parseFloat(ssclInput.value)/100; // SSCL at the specified rate
 
     // Calculate VAT base (SSCL base + SSCL) and then VAT at category-specific rate
     const vatBase = ssclBase + sscl;
@@ -404,37 +404,37 @@ function getShippingCharges(input) {
     // Model to price mapping
     const shippingRates = {
         // ¥103,000 category
-        1: { models: ["Alto", "Mira", "EK Wagon", "Wagon R", "Move", "Nissan Dayz", "ROOX", "TAFT", "Yaris"], charge: 103000 },
+        1: { models: ["Alto", "Mira", "EK Wagon", "Wagon R", "Move", "Nissan Dayz", "ROOX", "TAFT", "Yaris"], charge: 112000 },
         
         // ¥109,000 category
-        2: { models: ["Fit HV", "X bee", "Hustler", "Aqua", "Swift", "Note"], charge: 109000 },
+        2: { models: ["Fit HV", "X bee", "Hustler", "Aqua", "Swift", "Note"], charge: 118000 },
         
         // ¥114,000 category
-        3: { models: ["Raize", "Rocky", "Roomy"], charge: 114000 },
+        3: { models: ["Raize", "Rocky", "Roomy", "THOR"], charge: 124000 },
         
         // ¥119,000 category
-        4: { models: ["Fielder", "Axio", "Audi A3", "Other sedan"], charge: 119000 },
+        4: { models: ["Fielder", "Axio", "Audi A3", "Other sedan"], charge: 129000 },
         
         // ¥124,000 category
-        5: { models: ["Sienta HV", "Freed HV"], charge: 124000 },
+        5: { models: ["Sienta HV", "Freed HV"], charge: 135000 },
         
         // ¥129,000 category
-        6: { models: ["C-HR", "Vezel HV", "Yaris Cross"], charge: 129000 },
+        6: { models: ["C-HR", "Vezel HV", "Yaris Cross"], charge: 140000 },
         
         // ¥135,000 category
-        7: { models: ["Leaf", "Honda WR-V", "Audi Q3"], charge: 135000 },
+        7: { models: ["Leaf", "Honda WR-V", "Audi Q3"], charge: 146000 },
         
         // ¥140,000 category
-        8: { models: ["Corolla cross"], charge: 140000 },
+        8: { models: ["Corolla cross"], charge: 152000 },
         
         // ¥145,000 category
-        9: { models: ["Eclips cross", "Honda ZR-V"], charge: 145000 },
+        9: { models: ["Eclips cross", "Honda ZR-V"], charge: 157000 },
         
         // ¥150,000 category
-        10: { models: ["Voxy HV", "Noah HV", "X-trail"], charge: 150000 },
+        10: { models: ["Voxy HV", "Noah HV", "X-trail"], charge: 161000 },
         
         // ¥155,000 category
-        11: { models: ["CR-V", "Step Wagon"], charge: 155000 },
+        11: { models: ["CR-V", "Step Wagon"], charge: 162000 },
         
         // ¥166,000 category
         12: { models: ["HIACE V", "NISSAN CARAVAN"], charge: 166000 },
@@ -529,6 +529,7 @@ const vehicleSelect = document.getElementById('vehicle');
 const vehicleVariantSelect = document.getElementById("vehicleVariant");
 const winningBidInput = document.getElementById('winningBid');
 const areaCostInput = document.getElementById('areaCost');
+const ssclInput = document.getElementById('sscl');
 const auctionFeeInput = document.getElementById('auctionFee');
 const ttInput = document.getElementById('tt');
 const yenrateInput = document.getElementById('yenrate');
@@ -1613,6 +1614,32 @@ const vehicleDefaults = {
         capacity: 996, 
         winningBid: 1600000
     }],
+
+    "THOR": [{ 
+        label: "X", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1742400, 
+        capacity: 996, 
+        winningBid: 1250000 
+    },{
+        label: "G", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1939300, 
+        capacity: 996, 
+        winningBid: 1300000
+    },{
+        label: "Custom G", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 2118600, 
+        capacity: 996, 
+        winningBid: 1400000
+    },{
+        label: "Custom GT (Turbo)", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 2257200, 
+        capacity: 996, 
+        winningBid: 1600000
+    }],
     
     // ¥119,000 category
     "Axio": [{ 
@@ -1750,6 +1777,7 @@ vehicleSelect.addEventListener('change', updateVehicleVariants);
 vehicleVariantSelect.addEventListener('change', applyVehicleVariant);
 winningBidInput.addEventListener('input', calculateAndDisplay);
 areaCostInput.addEventListener('input', calculateAndDisplay);
+ssclInput.addEventListener('input', calculateAndDisplay);
 auctionFeeInput.addEventListener('input', calculateAndDisplay);
 ttInput.addEventListener('input', calculateAndDisplay);
 yenrateInput.addEventListener('input', calculateAndDisplay);

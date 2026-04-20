@@ -40,7 +40,7 @@
                             <option value="Leaf">Leaf</option>
                             <option value="Mira">Mira</option>
                             <option value="Move">Move</option>
-                            <option value="Nissan Dayz">Nissan Dayz</option>
+                            <option value="Nissan Dayz" selected>Nissan Dayz</option>
                             <option value="Note">Note</option>
                             <option value="Raize" >Raize</option>
                             <option value="Rocky">Rocky</option>
@@ -48,8 +48,9 @@
                             <option value="ROOX">ROOX</option>
                             <option value="Swift">Swift</option>
                             <option value="TAFT">TAFT</option>
+                            <option value="THOR">THOR</option>
                             <option value="Vezel HV">Vezel HV</option>
-                            <option value="Wagon R" selected>Wagon R</option>
+                            <option value="Wagon R">Wagon R</option>
                             <option value="X bee">X bee</option>
                             <option value="Yaris">Yaris</option>
                             <option value="Yaris Cross">Yaris Cross</option>
@@ -124,6 +125,11 @@
                     <div class="input-group">
                         <label for="clearing"><i class="fas fa-truck-loading"></i> Clearing (LKR)</label>
                         <input type="number" id="clearing" value="100000" min="0" step="10000">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="sscl"><i class="fas fa-gavel"></i> SSCL Rate</label>
+                        <input type="number" id="sscl" value="2.5" min="0" step="0.1">
                     </div>
                     
                     <button class="calculate-btn" id="calculateBtn">
