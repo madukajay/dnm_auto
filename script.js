@@ -404,7 +404,7 @@ function getShippingCharges(input) {
     // Model to price mapping
     const shippingRates = {
         // ¥103,000 category
-        1: { models: ["Alto", "Mira", "EK Wagon", "Wagon R", "Move", "Nissan Dayz", "ROOX", "TAFT", "Yaris"], charge: 112000 },
+        1: { models: ["Alto", "Mira", "EK Wagon", "Wagon R", "Move", "Nissan Dayz", "ROOX", "TAFT", "Yaris", "Spacia"], charge: 112000 },
         
         // ¥109,000 category
         2: { models: ["Fit HV", "X bee", "Hustler", "Aqua", "Swift", "Note"], charge: 118000 },
@@ -1335,6 +1335,38 @@ const vehicleDefaults = {
         taxbase: 2249500, 
         capacity: 660, 
         winningBid: 1550000 
+    }],
+
+    "Spacia": [{ 
+        label: "HYBRID G", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1530100, 
+        capacity: 657, 
+        winningBid: 1050000 
+    },{
+        label: "HYBRID X", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1705000, 
+        capacity: 657, 
+        winningBid: 1100000
+    },{
+        label: "Custom HYBRID GS", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1801800, 
+        capacity: 657, 
+        winningBid: 1200000
+    },{
+        label: "Custom HYBRID XS", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1995400, 
+        capacity: 657, 
+        winningBid: 1300000
+    },{
+        label: "Custom HYBRID XS TURBO", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 2073500, 
+        capacity: 657, 
+        winningBid: 1500000
     }],
 
     "EK Wagon": [{ 
