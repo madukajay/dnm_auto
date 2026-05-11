@@ -404,7 +404,7 @@ function getShippingCharges(input) {
     // Model to price mapping
     const shippingRates = {
         // ¥103,000 category
-        1: { models: ["Alto", "Mira", "EK Wagon", "Wagon R", "Move", "Nissan Dayz", "ROOX", "TAFT", "Yaris", "Spacia"], charge: 112000 },
+        1: { models: ["Alto", "Mira", "EK Wagon", "Wagon R", "Flair", "Move", "Nissan Dayz", "ROOX", "TAFT", "Yaris", "Spacia"], charge: 112000 },
         
         // ¥109,000 category
         2: { models: ["Fit HV", "X bee", "Hustler", "Aqua", "Swift", "Note"], charge: 118000 },
@@ -1175,6 +1175,20 @@ const vehicleDefaults = {
         taxbase: 1150000, 
         capacity: 660, 
         winningBid: 1000000 
+    }],
+
+    "Flair": [{ 
+        label: "G", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1455300, 
+        capacity: 660, 
+        winningBid: 1200000 
+    },{
+        label: "Hybrid XS", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1733600, 
+        capacity: 660, 
+        winningBid: 1350000 
     }],
 
     "Alto": [{ 
