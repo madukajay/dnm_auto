@@ -218,7 +218,7 @@ function calculateVehicleTax(fob, shipping, taxCategory, capacity) {
             getExciseDuty: (capacity) => {
                 return 1810900; // Fixed rate for <1000cc Hybrid
             },
-            cidRate: 0.20, // 20%
+            cidRate: 0.30, // 30%
             surchargeRate: 0.50, // 50% of CID
             vatRate: 0.18, // 18%
             luxuryThreshold: 5500000,
@@ -233,7 +233,7 @@ function calculateVehicleTax(fob, shipping, taxCategory, capacity) {
                     return capacity * 2450; // Default for >1000cc
                 }
             },
-            cidRate: 0.20, // 20%
+            cidRate: 0.30, // 30%
             surchargeRate: 0.50, // 50% of CID
             vatRate: 0.18, // 18%
             luxuryThreshold: 5000000,
@@ -245,7 +245,7 @@ function calculateVehicleTax(fob, shipping, taxCategory, capacity) {
                 return capacity * 2750;
                 
             },
-            cidRate: 0.20, // 20%
+            cidRate: 0.30, // 30%
             surchargeRate: 0.50, // 50% of CID
             vatRate: 0.18, // 18%
             luxuryThreshold: 5500000,
@@ -257,7 +257,7 @@ function calculateVehicleTax(fob, shipping, taxCategory, capacity) {
             getExciseDuty: (capacity) => {
                     return capacity * 3850;
             },
-            cidRate: 0.20, // 20%
+            cidRate: 0.30, // 30%
             surchargeRate: 0.50, // 50% of CID
             vatRate: 0.18, // 18%
             luxuryThreshold: 5500000,
@@ -268,7 +268,7 @@ function calculateVehicleTax(fob, shipping, taxCategory, capacity) {
             getExciseDuty: (capacity) => {
                 return capacity * 3450;
             },
-            cidRate: 0.20, // 20%
+            cidRate: 0.30, // 30%
             surchargeRate: 0.50, // 50% of CID
             vatRate: 0.18, // 18%
             luxuryThreshold: 5500000,
@@ -279,7 +279,7 @@ function calculateVehicleTax(fob, shipping, taxCategory, capacity) {
             getExciseDuty: (capacity) => {
                 return capacity * 4450;
             },
-            cidRate: 0.2, // 20%
+            cidRate: 0.3, // 30%
             surchargeRate: 0.5, // 50% of CID
             vatRate: 0.18, // 18%
             luxuryThreshold: 5000000,
@@ -290,7 +290,7 @@ function calculateVehicleTax(fob, shipping, taxCategory, capacity) {
             getExciseDuty: (capacity) => {
                 return capacity * 4800;
             },
-            cidRate: 0.20, // 20%
+            cidRate: 0.30, // 30%
             surchargeRate: 0.50, // 50% of CID
             vatRate: 0.18, // 18%
             luxuryThreshold: 5500000,
@@ -301,7 +301,7 @@ function calculateVehicleTax(fob, shipping, taxCategory, capacity) {
             getExciseDuty: (capacity) => {
                 return capacity * 6300;
             },
-            cidRate: 0.20, // 20%
+            cidRate: 0.30, // 30%
             surchargeRate: 0.50, // 50% of CID
             vatRate: 0.18, // 18%
             luxuryThreshold: 5500000,
@@ -312,7 +312,7 @@ function calculateVehicleTax(fob, shipping, taxCategory, capacity) {
             getExciseDuty: (capacity) => {
                 return capacity * 6900;
             },
-            cidRate: 0.20, // 20%
+            cidRate: 0.30, // 30%
             surchargeRate: 0.50, // 50% of CID
             vatRate: 0.18, // 18%
             luxuryThreshold: 5500000,
@@ -323,7 +323,7 @@ function calculateVehicleTax(fob, shipping, taxCategory, capacity) {
             getExciseDuty: (capacity) => {
                 return capacity * 40970;
             },
-            cidRate: 0.2, // 20%
+            cidRate: 0.3, // 30%
             surchargeRate: 0.5, // 50% of CID
             vatRate: 0.18, // 18%
             luxuryThreshold: 6000000,
@@ -334,7 +334,7 @@ function calculateVehicleTax(fob, shipping, taxCategory, capacity) {
             getExciseDuty: (capacity) => {
                 return capacity * 43440;
             },
-            cidRate: 0.2, // 20%
+            cidRate: 0.3, // 30%
             surchargeRate: 0.5, // 50% of CID
             vatRate: 0.18, // 18%
             luxuryThreshold: 6000000,
@@ -367,7 +367,8 @@ function calculateVehicleTax(fob, shipping, taxCategory, capacity) {
     const sscl = ssclBase * parseFloat(ssclInput.value)/100; // SSCL at the specified rate
 
     // Calculate VAT base (SSCL base + SSCL) and then VAT at category-specific rate
-    const vatBase = ssclBase + sscl;
+    // const vatBase = ssclBase + sscl;
+    const vatBase = ssclBase; // VAT is calculated on the base before adding SSCL, as per Sri Lankan tax rules
     const vat = vatBase * category.vatRate;
 
     // Calculate total tax
@@ -680,7 +681,7 @@ function formatTaxName(key) {
     const names = {
         CIF: 'CIF',
         exciseDuty: 'Excise Duty',
-        cid: 'CID (20% of CIF)',
+        cid: 'CID (30% of CIF)',
         surcharge: 'SUR (50% of CID)',
         sscl: 'SSCL (2.5%)',
         vat: 'VAT (18%)',
