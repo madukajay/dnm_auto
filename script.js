@@ -359,8 +359,9 @@ function calculateVehicleTax(fob, shipping, taxCategory, capacity) {
     // Calculate Cess Import Duty (CID) - category-specific rate
     const cid = cif * category.cidRate;
 
-    // Calculate Surcharge - category-specific rate
-    const surcharge = cid * category.surchargeRate;
+    // Calculate Surcharge - category-specific rate (toggle in Tax Breakdown column)
+    const applySurcharge = surchargeToggle?.checked ?? true;
+    const surcharge = applySurcharge ? cid * category.surchargeRate : 0;
 
     // Calculate SSCL base (CIF * 1.1 + excise duty + cid + surcharge)
     const ssclBase = (cif * 1.1) + exciseDuty + cid + surcharge;
@@ -536,11 +537,11 @@ const ttInput = document.getElementById('tt');
 const yenrateInput = document.getElementById('yenrate');
 const clearingInput = document.getElementById('clearing');
 const calculateBtn = document.getElementById('calculateBtn');
+const surchargeToggle = document.getElementById('surchargeToggle');
+const surchargeToggleState = document.getElementById('surchargeToggleState');
 const resultsContainer = document.getElementById('resultsContainer');
 const taxBreakdown = document.getElementById('taxBreakdown');
-const totalTaxElement = document.getElementById('totalTax');
 const totalPayableElement = document.getElementById('totalPayable');
-const summaryDetails = document.getElementById('summaryDetails');
 const vehicleInfo = document.getElementById('vehicleInfo');
 const taxCategorySelect = document.getElementById('taxcategory');
 const taxBaseInput = document.getElementById('taxbase');
@@ -574,14 +575,15 @@ function createResultCard(title, value, isYen = false, isLKR = false) {
     const valueEl = document.createElement('div');
     valueEl.className = 'result-value';
     
+    const formatted = parseInt(value).toLocaleString('en-US');
     if (isYen) {
         valueEl.classList.add('result-value-jpy');
-        valueEl.innerHTML = `<span class="currency-symbol">¥</span>${parseInt(value).toLocaleString()}`;
+        valueEl.innerHTML = `<span class="currency-symbol">¥</span><span class="amount-num">${formatted}</span>`;
     } else if (isLKR) {
         valueEl.classList.add('result-value-lkr');
-        valueEl.innerHTML = `<span class="currency-symbol">LKR</span>${parseInt(value).toLocaleString()}`;
+        valueEl.innerHTML = `<span class="currency-symbol">LKR</span><span class="amount-num">${formatted}</span>`;
     } else {
-        valueEl.innerHTML = `<span class="currency-symbol">LKR</span>${parseInt(value).toLocaleString()}`;
+        valueEl.innerHTML = `<span class="currency-symbol">LKR</span><span class="amount-num">${formatted}</span>`;
     }
     
     card.appendChild(titleEl);
@@ -599,7 +601,7 @@ function updateVehicleInfo(vehicle, shippingDetails) {
         </div>
         <div>
             <div>Model Code: <strong>${shippingDetails.code}</strong></div>
-            <div style="font-size: 0.8rem; color: #666;">Category: ${shippingDetails.models.join(', ')}</div>
+            <div class="vehicle-meta">Category: ${shippingDetails.models.join(', ')}</div>
         </div>
     `;
 }
@@ -770,7 +772,6 @@ function calculateAndDisplay() {
         // Clear previous results
         resultsContainer.innerHTML = '';
         taxBreakdown.innerHTML = '';
-        summaryDetails.innerHTML = '';
         
         // Display results
         const results = [
@@ -810,45 +811,24 @@ function calculateAndDisplay() {
             taxItem.appendChild(taxAmount);
             taxBreakdown.appendChild(taxItem);
         }
-        
-        // Update total tax
-        totalTaxElement.innerHTML = `
-            <span>Total Tax (LKR):</span>
-            <span>${formatCurrency(totalTax, 'LKR')}</span>
-        `;
+
+        const totalTaxItem = document.createElement('div');
+        totalTaxItem.className = 'tax-item tax-item-total';
+        const totalTaxName = document.createElement('div');
+        totalTaxName.className = 'tax-name';
+        totalTaxName.textContent = 'Total Tax (LKR)';
+        const totalTaxAmount = document.createElement('div');
+        totalTaxAmount.className = 'tax-amount';
+        totalTaxAmount.textContent = formatCurrency(totalTax, 'LKR');
+        totalTaxItem.appendChild(totalTaxName);
+        totalTaxItem.appendChild(totalTaxAmount);
+        taxBreakdown.appendChild(totalTaxItem);
         
         // Update total payable
         totalPayableElement.innerHTML = `
             <span>Total Amount Payable:</span>
             <span>${formatCurrency(totalLKR, 'LKR')}</span>
         `;
-        
-        // Display summary
-        const summaryItems = [
-            { label: 'Exchange Rate', value: `1 JPY = ${yenrate} LKR` },
-            { label: 'Vehicle Model', value: vehicle },
-            { label: 'Tax Category', value: taxCategorySelect.options[taxCategorySelect.selectedIndex].text }, // NEW
-            { label: 'Shipping Category', value: `Code ${shippingDetails.code}` },
-            { label: 'Auction Fee Category', value: getAuctionFeeCategory(winningBid) },
-            { label: 'Handling Fee Category', value: getHandlingFeeCategory(winningBid) }
-        ];
-        
-        summaryItems.forEach(item => {
-            const summaryItem = document.createElement('div');
-            summaryItem.className = 'summary-item';
-            
-            const label = document.createElement('div');
-            label.className = 'summary-label';
-            label.textContent = item.label;
-            
-            const value = document.createElement('div');
-            value.className = 'summary-value';
-            value.textContent = item.value;
-            
-            summaryItem.appendChild(label);
-            summaryItem.appendChild(value);
-            summaryDetails.appendChild(summaryItem);
-        });
         
     } catch (error) {
         alert(`Error: ${error.message}`);
@@ -929,210 +909,211 @@ function generatePDF() {
             minute: '2-digit' 
         });
         
-        // Create PDF
+        // Create PDF (theme matches website: dark glass + teal accents)
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('p', 'mm', 'a4');
-        
-        // Set red and black theme colors
-        const primaryRed = [178, 34, 34]; // Firebrick red
-        const darkRed = [139, 0, 0]; // Dark red
-        const lightRed = [255, 99, 71]; // Tomato red
-        const black = [0, 0, 0];
-        const darkGray = [51, 51, 51];
-        const lightGray = [245, 245, 245];
-        
-        // Add header with gradient
-        doc.setFillColor(...primaryRed);
-        doc.rect(0, 0, 210, 30, 'F');
-        
-        // Add DNM AUTO logo (text-based)
-        doc.setTextColor(255, 255, 255);
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(24);
-        doc.text("DNM AUTO", 25, 12);
-        
-        // Add company tagline
-        doc.setFontSize(18);
-        doc.setTextColor(255, 255, 255);
-        doc.setFont("helvetica", "bold");
-        doc.text(" - Vehicle Import Specialists", 72, 12);
+        const pageW = 210;
+        const margin = 15;
+        const contentW = pageW - margin * 2;
+        const refId = `${vehicle.replace(/\s+/g, '_')}_${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}_${Math.floor(Math.random() * 10000)}`;
 
-        doc.setFontSize(12);
-        doc.text("Newtown, Embilipitiya | School Lane, Rukmalgama, Kottawa", 25, 20);
-        doc.text("Tel: 077 847 2900 | 071 346 6099", 25, 26);
-        
-        // Add document title
-        doc.setFontSize(16);
-        doc.setTextColor(...darkRed);
-        doc.setFont("helvetica", "bold");
-        doc.text("VEHICLE IMPORT COST BREAKDOWN", 105, 40, null, null, 'center');
-        
-        // Add date and reference
-        doc.setFontSize(10);
-        doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
-        doc.text(`Generated: ${dateStr} at ${timeStr}`, 105, 47, null, null, 'center');
-        doc.text(`Reference: ${vehicle.replace(/\s+/g, '_')}_${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}_${Math.floor(Math.random() * 10000)}`, 105, 52, null, null, 'center');
-        
-        // Separator line with red color
-        doc.setDrawColor(...primaryRed);
-        doc.setLineWidth(0.8);
-        doc.line(15, 57, 195, 57);
-        
-        // Vehicle Information Section
-        doc.setFontSize(14);
-        doc.setTextColor(...darkRed);
-        doc.setFont("helvetica", "bold");
-        doc.text("VEHICLE INFORMATION", 15, 68);
-        
-        // Add decorative box with red border
-        doc.setDrawColor(...primaryRed);
-        doc.setFillColor(255, 250, 250); // Very light red background
-        doc.roundedRect(15, 73, 180, 30, 3, 3, 'F');
-        doc.roundedRect(15, 73, 180, 30, 3, 3, 'S');
-        
-        doc.setFontSize(11);
-        doc.setTextColor(black[0], black[1], black[2]);
-        doc.setFont("helvetica", "normal");
-        
-        // Vehicle info in two columns with icons (simulated)
-        doc.setFillColor(...primaryRed);
-        doc.circle(21, 81, 1.5, 'F'); // Red bullet
-        doc.text(`Vehicle Model: ${vehicle}`, 25, 82);
-        
-        doc.circle(21, 88, 1.5, 'F');
-        doc.text(`Year & Grade: ${vehicleYear} ${modelGrade}`, 25, 89);
-        
-        doc.circle(21, 95, 1.5, 'F');
-        doc.text(`Mileage: < ${mileage} km`, 25, 96);
-        
-        doc.circle(108, 81, 1.5, 'F');
-        doc.text(`Engine Capacity: ${capacity} cc`, 112, 82);
-        
-        doc.circle(108, 88, 1.5, 'F');
-        doc.text(`Auction Grade: ${auctionGrade}`, 112, 89);
-        
-        doc.circle(108, 95, 1.5, 'F');
-        doc.text(`Approximate Delivery: 8 - 10 Weeks`, 112, 96);
-        
-        let yPos = 115;
-        
-        // Cost Breakdown Section
-        doc.setFontSize(14);
-        doc.setTextColor(...darkRed);
-        doc.setFont("helvetica", "bold");
-        doc.text(`COST BREAKDOWN (Yen Rate: ${yenrate} LKR)`, 15, yPos);
-        yPos += 5;
-        
-        // Create table header
-        doc.setFillColor(...darkRed);
-        doc.roundedRect(15, yPos, 180, 8, 2, 2, 'F');
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(11);
-        doc.text("Description", 25, yPos + 5.5);
-        doc.text("Amount", 175, yPos + 5.5, null, null, 'right');
-        yPos += 12;
-        
-        // Helper function to add table rows
-        function addCostRow(description, amount, isYen = false, isHighlight = false) {
-            if (isHighlight) {
-                doc.setFillColor(255, 250, 250);
-                doc.rect(15, yPos, 180, 8, 'F');
-            }
-            
-            doc.setDrawColor(230, 230, 230);
+        const theme = {
+            bg: [6, 8, 15],
+            panel: [14, 18, 32],
+            panelAlt: [20, 26, 44],
+            border: [40, 48, 72],
+            accent: [0, 229, 199],
+            accentDim: [0, 80, 70],
+            text: [232, 236, 244],
+            muted: [139, 149, 173],
+            jpy: [255, 179, 71],
+            lkr: [94, 234, 212],
+            purple: [99, 102, 241],
+        };
+
+        const fillPage = () => {
+            doc.setFillColor(...theme.bg);
+            doc.rect(0, 0, pageW, 297, 'F');
+        };
+        fillPage();
+
+        const drawPanel = (x, y, w, h, accentBorder = false) => {
+            doc.setFillColor(...theme.panel);
+            doc.setDrawColor(...(accentBorder ? theme.accent : theme.border));
+            doc.setLineWidth(accentBorder ? 0.4 : 0.25);
+            doc.roundedRect(x, y, w, h, 3, 3, 'FD');
+        };
+
+        const drawSectionTitle = (title, y) => {
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(11);
+            doc.setTextColor(...theme.accent);
+            doc.text(title, margin, y);
+            doc.setDrawColor(...theme.border);
             doc.setLineWidth(0.2);
-            doc.line(15, yPos, 195, yPos);
-            
-            doc.setTextColor(black[0], black[1], black[2]);
-            doc.setFont("helvetica", isHighlight ? "bold" : "normal");
-            doc.setFontSize(10);
-            
-            // Add description with bullet
-            if (!isHighlight) {
-                doc.setFillColor(...primaryRed);
-                doc.circle(25, yPos + 4.5, 1, 'F');
+            doc.line(margin, y + 2, margin + contentW, y + 2);
+            return y + 8;
+        };
+
+        const drawBullet = (x, y) => {
+            doc.setFillColor(...theme.accent);
+            doc.circle(x, y, 1.2, 'F');
+        };
+
+        // Top accent bar (shimmer line)
+        doc.setFillColor(...theme.accent);
+        doc.rect(0, 0, pageW, 2.5, 'F');
+        doc.setFillColor(...theme.purple);
+        doc.rect(pageW * 0.45, 0, pageW * 0.2, 2.5, 'F');
+
+        // Header panel
+        drawPanel(margin, 8, contentW, 32, true);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(22);
+        doc.setTextColor(...theme.text);
+        doc.text('DNM AUTO', margin + 8, 20);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(...theme.muted);
+        doc.text('Vehicle Import Specialists  ·  Japan → Sri Lanka', margin + 8, 27);
+        doc.setFontSize(9);
+        doc.text('Newtown, Embilipitiya | School Lane, Rukmalgama, Kottawa', margin + 8, 33);
+        doc.text('Tel: 077 847 2900 | 071 346 6099', margin + 8, 38);
+
+        // Document title block
+        let yPos = 48;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(14);
+        doc.setTextColor(...theme.text);
+        doc.text('IMPORT COST QUOTATION', pageW / 2, yPos, { align: 'center' });
+        yPos += 7;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(...theme.muted);
+        doc.text(`Generated: ${dateStr} at ${timeStr}`, pageW / 2, yPos, { align: 'center' });
+        yPos += 5;
+        doc.text(`Reference: ${refId}`, pageW / 2, yPos, { align: 'center' });
+
+        // Vehicle information
+        yPos += 10;
+        yPos = drawSectionTitle('VEHICLE INFORMATION', yPos);
+        const vehicleBoxH = 32;
+        drawPanel(margin, yPos, contentW, vehicleBoxH, true);
+        doc.setFontSize(9.5);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(...theme.text);
+        const infoY = yPos + 8;
+        drawBullet(margin + 6, infoY - 1.5);
+        doc.text(`Vehicle Model: ${vehicle}`, margin + 10, infoY);
+        drawBullet(margin + 6, infoY + 6.5);
+        doc.text(`Year & Grade: ${vehicleYear} ${modelGrade}`, margin + 10, infoY + 8);
+        drawBullet(margin + 6, infoY + 14);
+        doc.text(`Mileage: < ${mileage} km`, margin + 10, infoY + 16);
+        drawBullet(margin + 98, infoY - 1.5);
+        doc.text(`Engine Capacity: ${capacity} cc`, margin + 102, infoY);
+        drawBullet(margin + 98, infoY + 6.5);
+        doc.text(`Auction Grade: ${auctionGrade}`, margin + 102, infoY + 8);
+        drawBullet(margin + 98, infoY + 14);
+        doc.setTextColor(...theme.muted);
+        doc.text('Approximate Delivery: 8 - 10 Weeks', margin + 102, infoY + 16);
+        yPos += vehicleBoxH + 10;
+
+        // Cost breakdown
+        yPos = drawSectionTitle(`COST BREAKDOWN  (JPY Rate: ${yenrate})`, yPos);
+        const tableHeaderH = 9;
+        doc.setFillColor(...theme.accentDim);
+        doc.setDrawColor(...theme.accent);
+        doc.setLineWidth(0.3);
+        doc.roundedRect(margin, yPos, contentW, tableHeaderH, 2, 2, 'FD');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.setTextColor(...theme.accent);
+        doc.text('Description', margin + 6, yPos + 6);
+        doc.text('Amount', margin + contentW - 6, yPos + 6, { align: 'right' });
+        yPos += tableHeaderH + 2;
+
+        let rowIndex = 0;
+        function addCostRow(description, amount, isYen = false, isHighlight = false) {
+            const rowH = isHighlight ? 10 : 8;
+            if (isHighlight) {
+                doc.setFillColor(...theme.accentDim);
+                doc.setDrawColor(...theme.accent);
+            } else if (rowIndex % 2 === 0) {
+                doc.setFillColor(...theme.panelAlt);
+                doc.setDrawColor(...theme.border);
+            } else {
+                doc.setFillColor(...theme.panel);
+                doc.setDrawColor(...theme.border);
             }
-            doc.text(description, 29, yPos + 5.5);
-            
-            // Format amount
-            const formattedAmount = isYen ? 
-                `¥${parseInt(amount).toLocaleString()}` : 
-                `LKR ${parseInt(amount).toLocaleString()}`;
-            
-            doc.setTextColor(isYen ? darkRed[0] : darkGray[0], 
-                           isYen ? darkRed[1] : darkGray[1], 
-                           isYen ? darkRed[2] : darkGray[2]);
-            doc.text(formattedAmount, 175, yPos + 5.5, null, null, 'right');
-            
-            yPos += 8;
+            doc.setLineWidth(0.15);
+            doc.rect(margin, yPos, contentW, rowH, 'FD');
+
+            doc.setFont('helvetica', isHighlight ? 'bold' : 'normal');
+            doc.setFontSize(isHighlight ? 10 : 9);
+            doc.setTextColor(...(isHighlight ? theme.text : theme.muted));
+            if (!isHighlight) {
+                drawBullet(margin + 5, yPos + rowH / 2);
+            }
+            doc.setTextColor(...theme.text);
+            doc.text(description, margin + (isHighlight ? 6 : 10), yPos + rowH / 2 + 1.5);
+
+            const formattedAmount = isYen
+                ? `¥ ${parseInt(amount).toLocaleString('en-US')}`
+                : `LKR ${parseInt(amount).toLocaleString('en-US')}`;
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(isHighlight ? 10.5 : 10);
+            const amountColor = isYen ? theme.jpy : (isHighlight ? theme.accent : theme.lkr);
+            doc.setTextColor(...amountColor);
+            doc.text(formattedAmount, margin + contentW - 6, yPos + rowH / 2 + 1.5, { align: 'right' });
+
+            yPos += rowH;
+            rowIndex++;
         }
-        
-        // Add all cost items
+
         addCostRow('Winning Bid', winningBid, true);
-        // addCostRow('Shipping Charges', shipping, true);
-        addCostRow('Handling and Shipping Charges', handling+shipping, true);
+        addCostRow('Handling and Shipping Charges', handling + shipping, true);
         addCostRow('Area Cost', AreaCost, true);
         addCostRow('CIF Discount', -TT, true);
         addCostRow('CIF Value (JPY)', cif, true);
-        yPos += 2;
-        
+        yPos += 3;
         addCostRow('Auction Deposit and Insurance', auctionFee + lkrTT, false);
         addCostRow('CIF (LKR) - LC Amount', lkrCif, false);
         addCostRow('Bank Commission', bankCommission, false);
-        // addCostRow('CIF Discount (LKR)', lkrTT, false);
         addCostRow('Clearing Charges', clearing, false);
-        yPos += 5;
-        
-        // Tax Breakdown Section
-        // doc.setFontSize(14);
-        // doc.setTextColor(...darkRed);
-        // doc.setFont("helvetica", "bold");
-        // doc.text("TAX BREAKDOWN", 15, yPos);
-        // yPos += 10;
-        
-        // // Add tax items
-        // for (const [key, value] of Object.entries(taxDetails.taxComponents)) {
-        //     const taxName = formatTaxName(key);
-        //     addCostRow(taxName, value, false);
-        // }
-        
-        // Total Tax (highlighted)
+        yPos += 3;
         addCostRow('TOTAL CUSTOMS TAX', totalTax, false, true);
+        yPos += 6;
+
+        // Total payable (matches website hero total card)
+        const totalBoxH = 26;
+        doc.setFillColor(...theme.panel);
+        doc.setDrawColor(...theme.accent);
+        doc.setLineWidth(0.6);
+        doc.roundedRect(margin, yPos, contentW, totalBoxH, 3, 3, 'FD');
+        doc.setFillColor(...theme.accentDim);
+        doc.roundedRect(margin + 1, yPos + 1, contentW - 2, totalBoxH - 2, 2.5, 2.5, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.setTextColor(...theme.text);
+        doc.text('TOTAL AMOUNT PAYABLE', pageW / 2, yPos + 10, { align: 'center' });
+        doc.setFontSize(18);
+        doc.setTextColor(...theme.lkr);
+        doc.text(`LKR ${parseInt(totalLKR).toLocaleString('en-US')}`, pageW / 2, yPos + 19, { align: 'center' });
+        yPos += totalBoxH + 14;
+
+        // Footer
+        doc.setDrawColor(...theme.border);
+        doc.setLineWidth(0.3);
+        doc.line(margin, yPos, margin + contentW, yPos);
         yPos += 8;
-        
-        // Final Total Amount Payable
-        doc.setFillColor(...darkRed);
-        doc.roundedRect(15, yPos, 180, 22, 3, 3, 'F');
-        
-        doc.setTextColor(255, 255, 255);
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(16);
-        doc.text("TOTAL AMOUNT PAYABLE", 105, yPos + 8, null, null, 'center');
-        
-        doc.setFontSize(20);
-        doc.setTextColor(255, 215, 0); // Gold color for total
-        doc.text(`LKR ${parseInt(totalLKR).toLocaleString()}`, 105, yPos + 17, null, null, 'center');
-        
-        yPos += 45;
-        
-        // Footer section
-        doc.setDrawColor(...primaryRed);
-        doc.setLineWidth(0.5);
-        doc.line(15, yPos, 195, yPos);
-        yPos += 8;
-        
-        doc.setFontSize(9);
-        doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
-        doc.setFont("helvetica", "normal");
-        
-        // Disclaimer
+        doc.setFont('helvetica', 'normal');
         doc.setFontSize(8);
-        doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
-        doc.text("This quotation is valid for 7 days from the date of issue.", 105, yPos, null, null, 'center');
-        doc.text("Prices are subject to change based on exchange rate fluctuations and government tax revisions.", 105, yPos + 4, null, null, 'center');
-        doc.text("© 2025 DNM AUTO. All rights reserved.", 105, yPos + 8, null, null, 'center');
-        
-        // Page number
+        doc.setTextColor(...theme.muted);
+        doc.text('This quotation is valid for 7 days from the date of issue.', pageW / 2, yPos, { align: 'center' });
+        doc.text('Prices may change with exchange rates and government tax revisions.', pageW / 2, yPos + 4, { align: 'center' });
+        doc.setTextColor(...theme.accent);
+        doc.text('© 2025 DNM AUTO · For reference only', pageW / 2, yPos + 9, { align: 'center' });
+
         // Save the PDF
         const fileName = `DNM_${vehicle.replace(/\s+/g, '_')}_Quotation_${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}.pdf`;
         doc.save(fileName);
@@ -1818,7 +1799,17 @@ const vehicleDefaults = {
 };
 
 // Event Listeners
+function updateSurchargeToggleLabel() {
+    if (!surchargeToggleState) return;
+    surchargeToggleState.textContent = surchargeToggle?.checked ? 'On' : 'Off';
+}
+
 calculateBtn.addEventListener('click', calculateAndDisplay);
+surchargeToggle?.addEventListener('change', () => {
+    updateSurchargeToggleLabel();
+    calculateAndDisplay();
+});
+updateSurchargeToggleLabel();
 document.addEventListener('DOMContentLoaded', updateVehicleVariants);
 vehicleSelect.addEventListener('change', updateVehicleVariants);
 vehicleVariantSelect.addEventListener('change', applyVehicleVariant);
