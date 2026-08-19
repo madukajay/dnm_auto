@@ -16,13 +16,13 @@ function getAuctionFee(winningBid) {
     }
 
     // Calculate auction fee based on winning bid ranges
-    if (winningBid < 1500000) {
+    if (winningBid < 2500000) {
         return 300000;
-    } else if (winningBid < 2000000) {
-        return 350000;
-    } else if (winningBid < 2500000) {
-        return 400000;
     } else if (winningBid < 3000000) {
+        return 350000;
+    } else if (winningBid < 3500000) {
+        return 400000;
+    } else if (winningBid < 4000000) {
         return 450000;
     } else {
         return 500000;
@@ -406,46 +406,46 @@ function getShippingCharges(input) {
     // Model to price mapping
     const shippingRates = {
         // ¥103,000 category
-        1: { models: ["Alto", "Mira", "EK Wagon", "Wagon R", "Flair", "Move", "Nissan Dayz", "ROOX", "TAFT", "Yaris", "Spacia"], charge: 112000 },
+        1: { models: ["Alto", "Mira", "EK Wagon", "Wagon R", "Flair", "Move", "Nissan Dayz", "ROOX", "TAFT", "Yaris", "Spacia"], charge: 120000 },
         
         // ¥109,000 category
-        2: { models: ["Fit HV", "X bee", "Hustler", "Aqua", "Swift", "Note"], charge: 118000 },
+        2: { models: ["Fit HV", "X bee", "Hustler", "Aqua", "Swift", "Note"], charge: 126000 },
         
         // ¥114,000 category
-        3: { models: ["Raize", "Rocky", "Roomy", "THOR"], charge: 124000 },
+        3: { models: ["Raize", "Rocky", "Roomy", "THOR"], charge: 132000 },
         
         // ¥119,000 category
-        4: { models: ["Fielder", "Axio", "Audi A3", "Other sedan"], charge: 129000 },
+        4: { models: ["Fielder", "Axio", "Audi A3", "Other sedan"], charge: 138000 },
         
         // ¥124,000 category
-        5: { models: ["Sienta HV", "Freed HV"], charge: 135000 },
+        5: { models: ["Sienta HV", "Freed HV"], charge: 144000 },
         
         // ¥129,000 category
-        6: { models: ["C-HR", "Vezel HV", "Yaris Cross"], charge: 140000 },
+        6: { models: ["C-HR", "Vezel HV", "Yaris Cross"], charge: 150000 },
         
         // ¥135,000 category
-        7: { models: ["Leaf", "Honda WR-V", "Audi Q3"], charge: 146000 },
+        7: { models: ["Leaf", "Honda WR-V", "Audi Q3"], charge: 156000 },
         
         // ¥140,000 category
-        8: { models: ["Corolla cross"], charge: 152000 },
+        8: { models: ["Corolla cross"], charge: 162000 },
         
         // ¥145,000 category
-        9: { models: ["Eclips cross", "Honda ZR-V"], charge: 157000 },
+        9: { models: ["Eclips cross", "Honda ZR-V"], charge: 168000 },
         
         // ¥150,000 category
-        10: { models: ["Voxy HV", "Noah HV", "X-trail"], charge: 161000 },
+        10: { models: ["Voxy HV", "Noah HV", "X-trail"], charge: 174000 },
         
         // ¥155,000 category
-        11: { models: ["CR-V", "Step Wagon"], charge: 162000 },
+        11: { models: ["CR-V", "Step Wagon"], charge: 180000 },
         
         // ¥166,000 category
-        12: { models: ["HIACE V", "NISSAN CARAVAN"], charge: 166000 },
+        12: { models: ["HIACE V", "NISSAN CARAVAN"], charge: 192000 },
         
         // ¥176,000 category
-        13: { models: ["ALPHARD", "VELLFIRE"], charge: 176000 },
+        13: { models: ["ALPHARD", "VELLFIRE"], charge: 204000 },
         
         // ¥186,000 category
-        14: { models: ["Land Cruiser Prado"], charge: 186000 }
+        14: { models: ["Land Cruiser Prado"], charge: 216000 }
     };
 
     // Create reverse lookup for model name to code
@@ -1166,11 +1166,18 @@ const vehicleDefaults = {
         capacity: 660, 
         winningBid: 1200000 
     },{
+        label: "Hybrid XG", 
+        taxCategory: "petrol_under_1000", 
+        taxbase: 1478400, 
+        capacity: 660, 
+        winningBid: 1150000 
+    },
+    {
         label: "Hybrid XS", 
         taxCategory: "petrol_under_1000", 
         taxbase: 1733600, 
         capacity: 660, 
-        winningBid: 1350000 
+        winningBid: 1500000 
     }],
 
     "Alto": [{ 
