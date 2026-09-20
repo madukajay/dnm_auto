@@ -678,6 +678,24 @@ select option {
     background: rgba(99, 102, 241, 0.08);
 }
 
+.tax-item-agent {
+    background: #7eb8b0;
+    border-color: rgba(13, 148, 136, 0.5);
+    border-left-color: var(--accent);
+}
+
+.tax-item-agent:hover {
+    background: #8fc4bd;
+}
+
+.tax-item-agent .tax-name {
+    color: #0f3d38;
+}
+
+.tax-item-agent .tax-amount {
+    color: #0d5c54;
+}
+
 .tax-item-total {
     margin-top: 0.35rem;
     background: linear-gradient(135deg, rgba(0, 229, 199, 0.15) 0%, rgba(99, 102, 241, 0.12) 100%);

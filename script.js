@@ -210,6 +210,7 @@ function calculateVehicleTax(fob, shipping, taxCategory, capacity) {
     if(taxBase > fob) {
         cifYen = (taxBase + shipping);
     }
+    let agent_value = (taxBase + shipping) * yenrate;
     let cif = cifYen * yenrate;
     // Tax rates based on category
     const taxRates = {
@@ -382,6 +383,7 @@ function calculateVehicleTax(fob, shipping, taxCategory, capacity) {
         capacity: capacity,
         taxRates: category,
         taxComponents: {
+            agentValue: parseFloat(agent_value.toFixed(2)),
             CIF: parseFloat(cif.toFixed(2)),
             exciseDuty: parseFloat(exciseDuty.toFixed(2)),
             cid: parseFloat(cid.toFixed(2)),
@@ -681,6 +683,7 @@ function applyVehicleVariant() {
 // Helper function to format tax names
 function formatTaxName(key) {
     const names = {
+        agentValue: 'Agent Value (LKR)',
         CIF: 'CIF',
         exciseDuty: 'Excise Duty',
         cid: 'CID (30% of CIF)',
@@ -798,6 +801,9 @@ function calculateAndDisplay() {
         for (const [key, value] of Object.entries(taxDetails.taxComponents)) {
             const taxItem = document.createElement('div');
             taxItem.className = 'tax-item';
+            if (key === 'agentValue') {
+                taxItem.classList.add('tax-item-agent');
+            }
             
             const taxName = document.createElement('div');
             taxName.className = 'tax-name';
