@@ -836,10 +836,58 @@ function calculateAndDisplay() {
     }
 }
 
-// PDF Generation Function
-function generatePDF() {
-    try {
+// PDF fonts — Noto Sans (modern, supports → ¥ · and other Unicode glyphs)
+let pdfFontCache = null; // { regular, bold } base64 | false
 
+function arrayBufferToBase64(buffer) {
+    const bytes = new Uint8Array(buffer);
+    let binary = '';
+    const chunk = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunk) {
+        binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+    }
+    return btoa(binary);
+}
+
+async function ensurePdfFonts(doc) {
+    if (pdfFontCache === false) return 'helvetica';
+
+    try {
+        if (!pdfFontCache) {
+            const base = 'https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts@main/hinted/ttf/NotoSans';
+            const [regularRes, boldRes] = await Promise.all([
+                fetch(`${base}/NotoSans-Regular.ttf`),
+                fetch(`${base}/NotoSans-Bold.ttf`),
+            ]);
+            if (!regularRes.ok || !boldRes.ok) throw new Error('Font download failed');
+
+            const [regularBuf, boldBuf] = await Promise.all([
+                regularRes.arrayBuffer(),
+                boldRes.arrayBuffer(),
+            ]);
+
+            pdfFontCache = {
+                regular: arrayBufferToBase64(regularBuf),
+                bold: arrayBufferToBase64(boldBuf),
+            };
+        }
+
+        doc.addFileToVFS('NotoSans-Regular.ttf', pdfFontCache.regular);
+        doc.addFileToVFS('NotoSans-Bold.ttf', pdfFontCache.bold);
+        doc.addFont('NotoSans-Regular.ttf', 'NotoSans', 'normal');
+        doc.addFont('NotoSans-Bold.ttf', 'NotoSans', 'bold');
+        doc.setFont('NotoSans', 'normal');
+        return 'NotoSans';
+    } catch (err) {
+        console.warn('Noto Sans unavailable for PDF, using Helvetica:', err);
+        pdfFontCache = false;
+        return 'helvetica';
+    }
+}
+
+// PDF Generation — light modern navy + teal quotation + Noto Sans
+async function generatePDF() {
+    try {
         const info = prompt(
             "Please enter vehicle details (separate with commas):\n\n" +
             "Format: Year, Model Grade, Auction Grade, Mileage\n" +
@@ -847,20 +895,17 @@ function generatePDF() {
             "Enter details:",
             "2025, G, 5, 10000"
         );
-        
-        if (info === null) return; // User cancelled
-        
-        // Parse the input
+
+        if (info === null) return;
+
         const parts = info.split(',').map(part => part.trim());
-        
         if (parts.length !== 4) {
             alert("Invalid format. Please enter all 4 values separated by commas.\nExample: 2025, G, 5, 10000");
             return;
         }
-        
+
         const [vehicleYear, modelGrade, auctionGrade, mileage] = parts;
 
-        // Get current values
         const vehicle = vehicleSelect.value;
         const winningBid = parseFloat(winningBidInput.value);
         let TT = parseFloat(ttInput.value);
@@ -870,201 +915,206 @@ function generatePDF() {
         const capacity = parseFloat(capacityInput.value);
         const AreaCost = parseFloat(areaCostInput.value);
         const auctionFeeInputValue = parseFloat(auctionFeeInput.value);
-        
-        // Recalculate to get current values
+
         const shippingDetails = getShippingCharges(vehicle);
         const shipping = shippingDetails.charge;
         const exporter = parseInt(exporterSelect.value);
 
-        if(exporter == ICM){
+        if (exporter == ICM) {
             TT = getMaxDiscountVoucher(winningBid);
         }
 
         const handling = calculateCharges(winningBid, exporter);
         let auctionFee = 0;
-        if(auctionFeeInputValue != 300000){
+        if (auctionFeeInputValue != 300000) {
             auctionFee = auctionFeeInputValue;
-        }else{
+        } else {
             auctionFee = getAuctionFee(winningBid);
         }
         const fob = winningBid + handling + AreaCost - TT;
         const cif = fob + shipping;
         const lkrCif = cif * yenrate;
-        const bankCommission = lkrCif * 0.01; // Assuming 1% bank commission
+        const bankCommission = lkrCif * 0.01;
         const LC = lkrCif + bankCommission;
         const lkrTT = TT * (yenrate + 0.01);
         const taxDetails = calculateVehicleTax(fob, shipping, taxCategory, capacity);
         const totalTax = taxDetails.totalTax;
         const totalLKR = auctionFee + lkrTT + LC + totalTax + clearing;
-        
-        // Get current date and time
+
         const now = new Date();
-        const dateStr = now.toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
+        const dateStr = now.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
         });
-        const timeStr = now.toLocaleTimeString('en-US', { 
-            hour: '2-digit', 
-            minute: '2-digit' 
+        const timeStr = now.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
         });
-        
-        // Create PDF (theme matches website: dark glass + teal accents)
+
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('p', 'mm', 'a4');
+        const fontFamily = await ensurePdfFonts(doc);
+        const font = (style = 'normal') => doc.setFont(fontFamily, style);
+
         const pageW = 210;
-        const margin = 15;
+        const margin = 14;
         const contentW = pageW - margin * 2;
         const refId = `${vehicle.replace(/\s+/g, '_')}_${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}_${Math.floor(Math.random() * 10000)}`;
 
         const theme = {
-            bg: [6, 8, 15],
-            panel: [14, 18, 32],
-            panelAlt: [20, 26, 44],
-            border: [40, 48, 72],
-            accent: [0, 229, 199],
-            accentDim: [0, 80, 70],
-            text: [232, 236, 244],
-            muted: [139, 149, 173],
-            jpy: [255, 179, 71],
-            lkr: [94, 234, 212],
-            purple: [99, 102, 241],
+            bg: [247, 248, 250],
+            paper: [255, 255, 255],
+            ink: [15, 23, 42],
+            muted: [100, 116, 139],
+            line: [226, 232, 240],
+            navy: [15, 23, 42],
+            teal: [13, 148, 136],
+            tealSoft: [204, 251, 241],
+            slate: [241, 245, 249],
+            jpy: [180, 83, 9],
+            white: [255, 255, 255],
         };
 
-        const fillPage = () => {
-            doc.setFillColor(...theme.bg);
-            doc.rect(0, 0, pageW, 297, 'F');
-        };
-        fillPage();
+        doc.setFillColor(...theme.bg);
+        doc.rect(0, 0, pageW, 297, 'F');
 
-        const drawPanel = (x, y, w, h, accentBorder = false) => {
-            doc.setFillColor(...theme.panel);
-            doc.setDrawColor(...(accentBorder ? theme.accent : theme.border));
-            doc.setLineWidth(accentBorder ? 0.4 : 0.25);
+        const drawCard = (x, y, w, h) => {
+            doc.setFillColor(...theme.paper);
+            doc.setDrawColor(...theme.line);
+            doc.setLineWidth(0.3);
             doc.roundedRect(x, y, w, h, 3, 3, 'FD');
         };
 
-        const drawSectionTitle = (title, y) => {
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(11);
-            doc.setTextColor(...theme.accent);
-            doc.text(title, margin, y);
-            doc.setDrawColor(...theme.border);
-            doc.setLineWidth(0.2);
-            doc.line(margin, y + 2, margin + contentW, y + 2);
-            return y + 8;
+        const drawSectionLabel = (title, y) => {
+            font('bold');
+            doc.setFontSize(8);
+            doc.setTextColor(...theme.teal);
+            doc.text(title.toUpperCase(), margin, y);
+            return y + 6;
         };
 
-        const drawBullet = (x, y) => {
-            doc.setFillColor(...theme.accent);
-            doc.circle(x, y, 1.2, 'F');
-        };
+        // Full-width navy header
+        doc.setFillColor(...theme.navy);
+        doc.rect(0, 0, pageW, 42, 'F');
+        doc.setFillColor(...theme.teal);
+        doc.rect(0, 42, pageW, 2.2, 'F');
 
-        // Top accent bar (shimmer line)
-        doc.setFillColor(...theme.accent);
-        doc.rect(0, 0, pageW, 2.5, 'F');
-        doc.setFillColor(...theme.purple);
-        doc.rect(pageW * 0.45, 0, pageW * 0.2, 2.5, 'F');
-
-        // Header panel
-        drawPanel(margin, 8, contentW, 32, true);
-        doc.setFont('helvetica', 'bold');
+        font('bold');
         doc.setFontSize(22);
-        doc.setTextColor(...theme.text);
-        doc.text('DNM AUTO', margin + 8, 20);
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(...theme.muted);
-        doc.text('Vehicle Import Specialists  ·  Japan → Sri Lanka', margin + 8, 27);
-        doc.setFontSize(9);
-        doc.text('Newtown, Embilipitiya | School Lane, Rukmalgama, Kottawa', margin + 8, 33);
-        doc.text('Tel: 077 847 2900 | 071 346 6099', margin + 8, 38);
+        doc.setTextColor(...theme.white);
+        doc.text('DNM AUTO', margin, 16);
 
-        // Document title block
-        let yPos = 48;
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(14);
-        doc.setTextColor(...theme.text);
-        doc.text('IMPORT COST QUOTATION', pageW / 2, yPos, { align: 'center' });
-        yPos += 7;
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(9);
-        doc.setTextColor(...theme.muted);
-        doc.text(`Generated: ${dateStr} at ${timeStr}`, pageW / 2, yPos, { align: 'center' });
-        yPos += 5;
-        doc.text(`Reference: ${refId}`, pageW / 2, yPos, { align: 'center' });
+        font('normal');
+        doc.setFontSize(8.5);
+        doc.setTextColor(148, 163, 184);
+        doc.text('Vehicle Import Specialists', margin, 23);
+        doc.text('Newtown, Embilipitiya  |  School Lane, Rukmalgama, Kottawa', margin, 30);
+        doc.text('Tel: 077 847 2900  |  071 346 6099', margin, 36);
 
-        // Vehicle information
-        yPos += 10;
-        yPos = drawSectionTitle('VEHICLE INFORMATION', yPos);
+        // Route chip in header
+        const chipText = 'Japan → Sri Lanka';
+        font('bold');
+        doc.setFontSize(8);
+        const chipW = doc.getTextWidth(chipText) + 10;
+        const chipX = pageW - margin - chipW;
+        doc.setFillColor(30, 41, 59);
+        doc.roundedRect(chipX, 11, chipW, 8, 4, 4, 'F');
+        doc.setTextColor(...theme.tealSoft);
+        doc.text(chipText, chipX + 5, 16.4);
+
+        font('normal');
+        doc.setFontSize(7.5);
+        doc.setTextColor(148, 163, 184);
+        doc.text('QUOTATION', pageW - margin, 28, { align: 'right' });
+        doc.text(dateStr, pageW - margin, 33.5, { align: 'right' });
+        doc.text(timeStr, pageW - margin, 38, { align: 'right' });
+
+        let yPos = 52;
+
+        // Title row
+        font('bold');
+        doc.setFontSize(16);
+        doc.setTextColor(...theme.ink);
+        doc.text('Import Cost Quotation', margin, yPos);
+        yPos += 6;
+        font('normal');
+        doc.setFontSize(8);
+        doc.setTextColor(...theme.muted);
+        doc.text(`Reference  ${refId}`, margin, yPos);
+        yPos += 8;
+
+        // Vehicle information card
+        yPos = drawSectionLabel('Vehicle information', yPos);
         const vehicleBoxH = 32;
-        drawPanel(margin, yPos, contentW, vehicleBoxH, true);
-        doc.setFontSize(9.5);
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(...theme.text);
-        const infoY = yPos + 8;
-        drawBullet(margin + 6, infoY - 1.5);
-        doc.text(`Vehicle Model: ${vehicle}`, margin + 10, infoY);
-        drawBullet(margin + 6, infoY + 6.5);
-        doc.text(`Year & Grade: ${vehicleYear} ${modelGrade}`, margin + 10, infoY + 8);
-        drawBullet(margin + 6, infoY + 14);
-        doc.text(`Mileage: < ${mileage} km`, margin + 10, infoY + 16);
-        drawBullet(margin + 98, infoY - 1.5);
-        doc.text(`Engine Capacity: ${capacity} cc`, margin + 102, infoY);
-        drawBullet(margin + 98, infoY + 6.5);
-        doc.text(`Auction Grade: ${auctionGrade}`, margin + 102, infoY + 8);
-        drawBullet(margin + 98, infoY + 14);
-        doc.setTextColor(...theme.muted);
-        doc.text('Approximate Delivery: 8 - 10 Weeks', margin + 102, infoY + 16);
+        drawCard(margin, yPos, contentW, vehicleBoxH);
+
+        const infoCol = [
+            [
+                ['Model', vehicle],
+                ['Year & Grade', `${vehicleYear} ${modelGrade}`],
+                ['Mileage', `< ${mileage} km`],
+            ],
+            [
+                ['Engine', `${capacity} cc`],
+                ['Auction Grade', String(auctionGrade)],
+                ['Delivery', '8 – 10 weeks'],
+            ],
+        ];
+
+        infoCol.forEach((col, colIdx) => {
+            const x = margin + 8 + colIdx * 92;
+            col.forEach((pair, rowIdx) => {
+                const iy = yPos + 8 + rowIdx * 8.5;
+                font('normal');
+                doc.setFontSize(7);
+                doc.setTextColor(...theme.muted);
+                doc.text(pair[0].toUpperCase(), x, iy);
+                font('bold');
+                doc.setFontSize(9);
+                doc.setTextColor(...theme.ink);
+                doc.text(pair[1], x + 32, iy);
+            });
+        });
         yPos += vehicleBoxH + 10;
 
         // Cost breakdown
-        yPos = drawSectionTitle(`COST BREAKDOWN  (JPY Rate: ${yenrate})`, yPos);
+        yPos = drawSectionLabel(`Cost breakdown  ·  JPY rate ${yenrate}`, yPos);
         const tableHeaderH = 9;
-        doc.setFillColor(...theme.accentDim);
-        doc.setDrawColor(...theme.accent);
-        doc.setLineWidth(0.3);
-        doc.roundedRect(margin, yPos, contentW, tableHeaderH, 2, 2, 'FD');
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(9);
-        doc.setTextColor(...theme.accent);
-        doc.text('Description', margin + 6, yPos + 6);
-        doc.text('Amount', margin + contentW - 6, yPos + 6, { align: 'right' });
-        yPos += tableHeaderH + 2;
+        doc.setFillColor(...theme.navy);
+        doc.roundedRect(margin, yPos, contentW, tableHeaderH, 2, 2, 'F');
+        font('bold');
+        doc.setFontSize(8);
+        doc.setTextColor(...theme.white);
+        doc.text('DESCRIPTION', margin + 6, yPos + 6);
+        doc.text('AMOUNT', margin + contentW - 6, yPos + 6, { align: 'right' });
+        yPos += tableHeaderH;
 
         let rowIndex = 0;
         function addCostRow(description, amount, isYen = false, isHighlight = false) {
             const rowH = isHighlight ? 10 : 8;
             if (isHighlight) {
-                doc.setFillColor(...theme.accentDim);
-                doc.setDrawColor(...theme.accent);
+                doc.setFillColor(...theme.tealSoft);
             } else if (rowIndex % 2 === 0) {
-                doc.setFillColor(...theme.panelAlt);
-                doc.setDrawColor(...theme.border);
+                doc.setFillColor(...theme.paper);
             } else {
-                doc.setFillColor(...theme.panel);
-                doc.setDrawColor(...theme.border);
+                doc.setFillColor(...theme.slate);
             }
-            doc.setLineWidth(0.15);
-            doc.rect(margin, yPos, contentW, rowH, 'FD');
+            doc.rect(margin, yPos, contentW, rowH, 'F');
 
-            doc.setFont('helvetica', isHighlight ? 'bold' : 'normal');
-            doc.setFontSize(isHighlight ? 10 : 9);
-            doc.setTextColor(...(isHighlight ? theme.text : theme.muted));
-            if (!isHighlight) {
-                drawBullet(margin + 5, yPos + rowH / 2);
-            }
-            doc.setTextColor(...theme.text);
-            doc.text(description, margin + (isHighlight ? 6 : 10), yPos + rowH / 2 + 1.5);
+            font(isHighlight ? 'bold' : 'normal');
+            doc.setFontSize(isHighlight ? 9 : 8.5);
+            doc.setTextColor(...theme.ink);
+            doc.text(description, margin + 6, yPos + rowH / 2 + 1.4);
 
             const formattedAmount = isYen
                 ? `¥ ${parseInt(amount).toLocaleString('en-US')}`
                 : `LKR ${parseInt(amount).toLocaleString('en-US')}`;
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(isHighlight ? 10.5 : 10);
-            const amountColor = isYen ? theme.jpy : (isHighlight ? theme.accent : theme.lkr);
+            font('bold');
+            doc.setFontSize(isHighlight ? 10 : 8.5);
+            const amountColor = isHighlight ? theme.teal : (isYen ? theme.jpy : theme.ink);
             doc.setTextColor(...amountColor);
-            doc.text(formattedAmount, margin + contentW - 6, yPos + rowH / 2 + 1.5, { align: 'right' });
+            doc.text(formattedAmount, margin + contentW - 6, yPos + rowH / 2 + 1.4, { align: 'right' });
 
             yPos += rowH;
             rowIndex++;
@@ -1075,49 +1125,44 @@ function generatePDF() {
         addCostRow('Area Cost', AreaCost, true);
         addCostRow('CIF Discount', -TT, true);
         addCostRow('CIF Value (JPY)', cif, true);
-        yPos += 3;
         addCostRow('Auction Deposit and Insurance', auctionFee + lkrTT, false);
         addCostRow('CIF (LKR) - LC Amount', lkrCif, false);
         addCostRow('Bank Commission', bankCommission, false);
         addCostRow('Clearing Charges', clearing, false);
-        yPos += 3;
-        addCostRow('TOTAL CUSTOMS TAX', totalTax, false, true);
-        yPos += 6;
+        addCostRow('Total Customs Tax', totalTax, false, true);
+        yPos += 8;
 
-        // Total payable (matches website hero total card)
+        // Total payable
         const totalBoxH = 26;
-        doc.setFillColor(...theme.panel);
-        doc.setDrawColor(...theme.accent);
-        doc.setLineWidth(0.6);
-        doc.roundedRect(margin, yPos, contentW, totalBoxH, 3, 3, 'FD');
-        doc.setFillColor(...theme.accentDim);
-        doc.roundedRect(margin + 1, yPos + 1, contentW - 2, totalBoxH - 2, 2.5, 2.5, 'F');
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(12);
-        doc.setTextColor(...theme.text);
-        doc.text('TOTAL AMOUNT PAYABLE', pageW / 2, yPos + 10, { align: 'center' });
+        doc.setFillColor(...theme.navy);
+        doc.roundedRect(margin, yPos, contentW, totalBoxH, 3.5, 3.5, 'F');
+        doc.setFillColor(...theme.teal);
+        doc.roundedRect(margin, yPos, 4, totalBoxH, 1.5, 1.5, 'F');
+        font('normal');
+        doc.setFontSize(8);
+        doc.setTextColor(148, 163, 184);
+        doc.text('TOTAL AMOUNT PAYABLE', margin + 14, yPos + 9);
+        font('bold');
         doc.setFontSize(18);
-        doc.setTextColor(...theme.lkr);
-        doc.text(`LKR ${parseInt(totalLKR).toLocaleString('en-US')}`, pageW / 2, yPos + 19, { align: 'center' });
-        yPos += totalBoxH + 14;
+        doc.setTextColor(...theme.white);
+        doc.text(`LKR ${parseInt(totalLKR).toLocaleString('en-US')}`, margin + 14, yPos + 19);
+        yPos += totalBoxH + 12;
 
         // Footer
-        doc.setDrawColor(...theme.border);
+        doc.setDrawColor(...theme.line);
         doc.setLineWidth(0.3);
         doc.line(margin, yPos, margin + contentW, yPos);
-        yPos += 8;
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(8);
+        yPos += 6;
+        font('normal');
+        doc.setFontSize(7.5);
         doc.setTextColor(...theme.muted);
-        doc.text('This quotation is valid for 7 days from the date of issue.', pageW / 2, yPos, { align: 'center' });
-        doc.text('Prices may change with exchange rates and government tax revisions.', pageW / 2, yPos + 4, { align: 'center' });
-        doc.setTextColor(...theme.accent);
-        doc.text('© 2025 DNM AUTO · For reference only', pageW / 2, yPos + 9, { align: 'center' });
+        doc.text('Valid for 7 days from issue. Amounts may change with exchange rates and tax revisions.', margin, yPos);
+        font('bold');
+        doc.setTextColor(...theme.navy);
+        doc.text('© 2025 DNM AUTO  ·  For reference only', pageW - margin, yPos, { align: 'right' });
 
-        // Save the PDF
-        const fileName = `DNM_${vehicle.replace(/\s+/g, '_')}_Quotation_${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}.pdf`;
+        const fileName = `DNM_${vehicle.replace(/\s+/g, '_')}_Quotation_${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}.pdf`;
         doc.save(fileName);
-        
     } catch (error) {
         alert(`Error generating PDF: ${error.message}`);
         console.error(error);
