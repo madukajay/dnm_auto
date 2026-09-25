@@ -43,31 +43,31 @@ function calculateCharges(winningBid, exporter) {
     if (exporter === AUTOCOM) {
         // For bids up to 1,000,000 JPY
         if (winningBid <= 1000000) {
-            return 217000;
+            return 247000;
         }
         
         // For bids between 1,001,000 and 1,500,000 JPY
         if (winningBid <= 1500000) {
-            return 227000;
+            return 257000;
         }
         
         // For bids between 1,501,000 and 2,000,000 JPY
         if (winningBid <= 2000000) {
-            return 247000;
+            return 277000;
         }
         
         // For bids between 2,000,000 and 2,500,000 JPY
         if (winningBid <= 2500000) {
-            return 267000;
+            return 297000;
         }
         
         // For bids between 2,500,000 and 3,000,000 JPY
         if (winningBid <= 3000000) {
-            return 287000;
+            return 317000;
         }
         
         // For bids above 3,000,000 JPY
-        const baseCharge = 287000;
+        const baseCharge = 317000;
         const additionalAmount = winningBid - 3000000;
         const additionalCharges = Math.ceil(additionalAmount / 500000) * 20000;
         
@@ -184,6 +184,29 @@ function getMaxDiscountVoucher(auctionPrice) {
     }
 
     return maxDiscount;
+}
+
+/**
+ * TT amount (JPY) from winning bid (BUYOUT table).
+ * 70–100万 → 220000, 100–150万 → 250000, 150–200万 → 290000,
+ * 200–250万 → 320000, 250–300万 → 350000, 300万+ → 370000
+ */
+function getTTAmount(winningBid) {
+    if (typeof winningBid !== 'number' || Number.isNaN(winningBid) || winningBid < 0) {
+        return 0;
+    }
+    if (winningBid <= 1000000) return 220000;
+    if (winningBid <= 1500000) return 250000;
+    if (winningBid <= 2000000) return 290000;
+    if (winningBid <= 2500000) return 320000;
+    if (winningBid <= 3000000) return 350000;
+    return 370000;
+}
+
+function syncTTFromBid() {
+    const winningBid = parseFloat(winningBidInput.value);
+    if (Number.isNaN(winningBid)) return;
+    ttInput.value = getTTAmount(winningBid);
 }
 
 /**
@@ -642,6 +665,8 @@ function updateVehicleDefaults() {
         capacityInput.value = 1500;
         winningBidInput.value = 2000000;
     }
+
+    syncTTFromBid();
     
     // Trigger calculation
     calculateAndDisplay();
@@ -676,6 +701,7 @@ function applyVehicleVariant() {
   taxBaseInput.value = variant.taxbase;
   capacityInput.value = variant.capacity;
   winningBidInput.value = variant.winningBid;
+  syncTTFromBid();
 
   calculateAndDisplay();
 }
@@ -722,7 +748,7 @@ function calculateAndDisplay() {
         // Get input values
         const vehicle = vehicleSelect.value;
         const winningBid = parseFloat(winningBidInput.value);
-        let TT = parseFloat(ttInput.value);
+        let TT = getTTAmount(winningBid);
         const yenrate = parseFloat(yenrateInput.value);
         const clearing = parseFloat(clearingInput.value);
         const taxCategory = taxCategorySelect.value; // NEW: Get tax category
@@ -744,6 +770,7 @@ function calculateAndDisplay() {
         if(exporter === ICM){
             TT = getMaxDiscountVoucher(winningBid);
         }
+        ttInput.value = TT;
         
         // Calculate other charges
         const handling = calculateCharges(winningBid, exporter);
@@ -914,7 +941,7 @@ async function generatePDF() {
 
         const vehicle = vehicleSelect.value;
         const winningBid = parseFloat(winningBidInput.value);
-        let TT = parseFloat(ttInput.value);
+        let TT = getTTAmount(winningBid);
         const yenrate = parseFloat(yenrateInput.value);
         const clearing = parseFloat(clearingInput.value);
         const taxCategory = taxCategorySelect.value;
