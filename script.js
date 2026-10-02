@@ -573,6 +573,7 @@ const taxBaseInput = document.getElementById('taxbase');
 const exporterSelect = document.getElementById('exporter');
 const capacityInput = document.getElementById('capacity');
 const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+const downloadReceiptBtn = document.getElementById('downloadReceiptBtn');
 
 // Format currency
 function formatCurrency(amount, currency = 'LKR', isYen = false) {
@@ -1195,6 +1196,254 @@ async function generatePDF() {
         doc.text('© 2025 DNM AUTO  ·  For reference only', pageW - margin, yPos, { align: 'right' });
 
         const fileName = `DNM_${vehicle.replace(/\s+/g, '_')}_Quotation_${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}.pdf`;
+        doc.save(fileName);
+    } catch (error) {
+        alert(`Error generating PDF: ${error.message}`);
+        console.error(error);
+    }
+}
+
+async function generateReceiptPDF() {
+    try {
+        const info = prompt(
+            "Please enter vehicle details (separate with commas):\n\n" +
+            "Format: Year, Model Grade, Auction Grade, Mileage\n" +
+            "Example: 2025, G, 5, 10000\n\n" +
+            "Enter details:",
+            "2025, G, 5, 10000"
+        );
+
+        if (info === null) return;
+
+        const parts = info.split(',').map(part => part.trim());
+        if (parts.length !== 4) {
+            alert("Invalid format. Please enter all 4 values separated by commas.\nExample: 2025, G, 5, 10000");
+            return;
+        }
+
+        const [vehicleYear, modelGrade, auctionGrade, mileage] = parts;
+        const vehicle = vehicleSelect.value;
+        const capacity = parseFloat(capacityInput.value);
+        const depositAmount = 300000;
+
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+        });
+        const timeStr = now.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'a4');
+        const fontFamily = await ensurePdfFonts(doc);
+        const font = (style = 'normal') => doc.setFont(fontFamily, style);
+
+        const pageW = 210;
+        const margin = 14;
+        const contentW = pageW - margin * 2;
+        const receiptNo = `DEP-${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
+
+        const theme = {
+            bg: [247, 248, 250],
+            paper: [255, 255, 255],
+            ink: [15, 23, 42],
+            muted: [100, 116, 139],
+            line: [226, 232, 240],
+            navy: [15, 23, 42],
+            teal: [13, 148, 136],
+            tealSoft: [204, 251, 241],
+            slate: [241, 245, 249],
+            white: [255, 255, 255],
+        };
+
+        doc.setFillColor(...theme.bg);
+        doc.rect(0, 0, pageW, 297, 'F');
+
+        const drawCard = (x, y, w, h) => {
+            doc.setFillColor(...theme.paper);
+            doc.setDrawColor(...theme.line);
+            doc.setLineWidth(0.3);
+            doc.roundedRect(x, y, w, h, 3, 3, 'FD');
+        };
+
+        const drawSectionLabel = (title, y) => {
+            font('bold');
+            doc.setFontSize(8);
+            doc.setTextColor(...theme.teal);
+            doc.text(title.toUpperCase(), margin, y);
+            return y + 6;
+        };
+
+        doc.setFillColor(...theme.navy);
+        doc.rect(0, 0, pageW, 42, 'F');
+        doc.setFillColor(...theme.teal);
+        doc.rect(0, 42, pageW, 2.2, 'F');
+
+        font('bold');
+        doc.setFontSize(22);
+        doc.setTextColor(...theme.white);
+        doc.text('DNM AUTO', margin, 16);
+
+        font('normal');
+        doc.setFontSize(8.5);
+        doc.setTextColor(148, 163, 184);
+        doc.text('Vehicle Import Specialists', margin, 23);
+        doc.text('Newtown, Embilipitiya  |  School Lane, Rukmalgama, Kottawa', margin, 30);
+        doc.text('Tel: 077 847 2900  |  071 346 6099', margin, 36);
+
+        const chipText = 'Japan → Sri Lanka';
+        font('bold');
+        doc.setFontSize(8);
+        const chipW = doc.getTextWidth(chipText) + 10;
+        const chipX = pageW - margin - chipW;
+        doc.setFillColor(30, 41, 59);
+        doc.roundedRect(chipX, 11, chipW, 8, 4, 4, 'F');
+        doc.setTextColor(...theme.tealSoft);
+        doc.text(chipText, chipX + 5, 16.4);
+
+        font('normal');
+        doc.setFontSize(7.5);
+        doc.setTextColor(148, 163, 184);
+        doc.text('RECEIPT', pageW - margin, 28, { align: 'right' });
+        doc.text(dateStr, pageW - margin, 33.5, { align: 'right' });
+        doc.text(timeStr, pageW - margin, 38, { align: 'right' });
+
+        let yPos = 52;
+
+        font('bold');
+        doc.setFontSize(16);
+        doc.setTextColor(...theme.ink);
+        doc.text('Auction Deposit Receipt', margin, yPos);
+        yPos += 6;
+        font('normal');
+        doc.setFontSize(8);
+        doc.setTextColor(...theme.muted);
+        doc.text(`Receipt No.  ${receiptNo}`, margin, yPos);
+        yPos += 8;
+
+        yPos = drawSectionLabel('Vehicle information', yPos);
+        const vehicleBoxH = 32;
+        drawCard(margin, yPos, contentW, vehicleBoxH);
+
+        const infoCol = [
+            [
+                ['Model', vehicle],
+                ['Year & Grade', `${vehicleYear} ${modelGrade}`],
+                ['Mileage', `< ${mileage} km`],
+            ],
+            [
+                ['Engine', `${capacity} cc`],
+                ['Auction Grade', String(auctionGrade)],
+                ['Status', 'Deposit received'],
+            ],
+        ];
+
+        infoCol.forEach((col, colIdx) => {
+            const x = margin + 8 + colIdx * 92;
+            col.forEach((pair, rowIdx) => {
+                const iy = yPos + 8 + rowIdx * 8.5;
+                font('normal');
+                doc.setFontSize(7);
+                doc.setTextColor(...theme.muted);
+                doc.text(pair[0].toUpperCase(), x, iy);
+                font('bold');
+                doc.setFontSize(9);
+                doc.setTextColor(...theme.ink);
+                doc.text(String(pair[1]), x + 32, iy);
+            });
+        });
+        yPos += vehicleBoxH + 10;
+
+        yPos = drawSectionLabel('Payment details', yPos);
+        const tableHeaderH = 9;
+        doc.setFillColor(...theme.navy);
+        doc.roundedRect(margin, yPos, contentW, tableHeaderH, 2, 2, 'F');
+        font('bold');
+        doc.setFontSize(8);
+        doc.setTextColor(...theme.white);
+        doc.text('DESCRIPTION', margin + 6, yPos + 6);
+        doc.text('AMOUNT', margin + contentW - 6, yPos + 6, { align: 'right' });
+        yPos += tableHeaderH;
+
+        const paymentRows = [
+            ['Auction deposit payment', depositAmount, false],
+            ['Total received', depositAmount, true],
+        ];
+
+        paymentRows.forEach((row, rowIndex) => {
+            const [description, amount, isHighlight] = row;
+            const rowH = isHighlight ? 10 : 8;
+            doc.setFillColor(...(isHighlight ? theme.tealSoft : (rowIndex % 2 === 0 ? theme.paper : theme.slate)));
+            doc.rect(margin, yPos, contentW, rowH, 'F');
+            font(isHighlight ? 'bold' : 'normal');
+            doc.setFontSize(isHighlight ? 9 : 8.5);
+            doc.setTextColor(...theme.ink);
+            doc.text(description, margin + 6, yPos + rowH / 2 + 1.4);
+            font('bold');
+            doc.setFontSize(isHighlight ? 10 : 8.5);
+            doc.setTextColor(...(isHighlight ? theme.teal : theme.ink));
+            doc.text(`LKR ${parseInt(amount).toLocaleString('en-US')}`, margin + contentW - 6, yPos + rowH / 2 + 1.4, { align: 'right' });
+            yPos += rowH;
+        });
+        yPos += 8;
+
+        const totalBoxH = 26;
+        doc.setFillColor(...theme.navy);
+        doc.roundedRect(margin, yPos, contentW, totalBoxH, 3.5, 3.5, 'F');
+        doc.setFillColor(...theme.teal);
+        doc.roundedRect(margin, yPos, 4, totalBoxH, 1.5, 1.5, 'F');
+        font('normal');
+        doc.setFontSize(8);
+        doc.setTextColor(148, 163, 184);
+        doc.text('AMOUNT RECEIVED', margin + 14, yPos + 9);
+        font('bold');
+        doc.setFontSize(18);
+        doc.setTextColor(...theme.white);
+        doc.text(`LKR ${depositAmount.toLocaleString('en-US')}`, margin + 14, yPos + 19);
+        yPos += totalBoxH + 16;
+
+        yPos = drawSectionLabel('Authorization', yPos);
+        const signBoxH = 42;
+        drawCard(margin, yPos, contentW, signBoxH);
+        font('normal');
+        doc.setFontSize(7.5);
+        doc.setTextColor(...theme.muted);
+        doc.text('DIGITALLY SIGNED BY', margin + 10, yPos + 10);
+        font('bold');
+        doc.setFontSize(12);
+        doc.setTextColor(...theme.ink);
+        doc.text('H.A.D.N.M. Jayasinghe', margin + 10, yPos + 20);
+        font('normal');
+        doc.setFontSize(9);
+        doc.setTextColor(...theme.muted);
+        doc.text('CEO and Director', margin + 10, yPos + 27);
+        doc.text('DNM Auto', margin + 10, yPos + 33);
+
+        font('normal');
+        doc.setFontSize(7.5);
+        doc.setTextColor(...theme.teal);
+        doc.text('This receipt confirms payment of the auction deposit.', pageW - margin - 10, yPos + 20, { align: 'right' });
+        doc.setTextColor(...theme.muted);
+        doc.text(`Issued ${dateStr} at ${timeStr}`, pageW - margin - 10, yPos + 27, { align: 'right' });
+        yPos += signBoxH + 12;
+
+        doc.setDrawColor(...theme.line);
+        doc.setLineWidth(0.3);
+        doc.line(margin, yPos, margin + contentW, yPos);
+        yPos += 6;
+        font('normal');
+        doc.setFontSize(7.5);
+        doc.setTextColor(...theme.muted);
+        doc.text('This document is issued as a digital receipt for the auction deposit payment.', margin, yPos);
+        font('bold');
+        doc.setTextColor(...theme.navy);
+        doc.text('© 2025 DNM AUTO  ·  For reference only', pageW - margin, yPos, { align: 'right' });
+
+        const fileName = `DNM_${vehicle.replace(/\s+/g, '_')}_Deposit_Receipt_${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}.pdf`;
         doc.save(fileName);
     } catch (error) {
         alert(`Error generating PDF: ${error.message}`);
@@ -1936,4 +2185,5 @@ taxCategorySelect.addEventListener('change', calculateAndDisplay); // NEW
 taxBaseInput.addEventListener('input', calculateAndDisplay);
 exporterSelect.addEventListener('change', calculateAndDisplay);
 downloadPdfBtn.addEventListener('click', generatePDF);
+downloadReceiptBtn.addEventListener('click', generateReceiptPDF);
 
