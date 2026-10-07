@@ -206,7 +206,13 @@ function getTTAmount(winningBid) {
 function syncTTFromBid() {
     const winningBid = parseFloat(winningBidInput.value);
     if (Number.isNaN(winningBid)) return;
-    ttInput.value = getTTAmount(winningBid);
+    const exporter = parseInt(exporterSelect.value);
+    if (exporter === ICM) {
+        const voucher = getMaxDiscountVoucher(winningBid);
+        ttInput.value = voucher == null ? 0 : voucher;
+    } else {
+        ttInput.value = getTTAmount(winningBid);
+    }
 }
 
 /**
@@ -749,7 +755,7 @@ function calculateAndDisplay() {
         // Get input values
         const vehicle = vehicleSelect.value;
         const winningBid = parseFloat(winningBidInput.value);
-        let TT = getTTAmount(winningBid);
+        let TT = parseFloat(ttInput.value);
         const yenrate = parseFloat(yenrateInput.value);
         const clearing = parseFloat(clearingInput.value);
         const taxCategory = taxCategorySelect.value; // NEW: Get tax category
@@ -767,11 +773,6 @@ function calculateAndDisplay() {
         // Get shipping charges
         const shippingDetails = getShippingCharges(vehicle);
         const shipping = shippingDetails.charge;
-
-        if(exporter === ICM){
-            TT = getMaxDiscountVoucher(winningBid);
-        }
-        ttInput.value = TT;
         
         // Calculate other charges
         const handling = calculateCharges(winningBid, exporter);
@@ -942,7 +943,7 @@ async function generatePDF() {
 
         const vehicle = vehicleSelect.value;
         const winningBid = parseFloat(winningBidInput.value);
-        let TT = getTTAmount(winningBid);
+        let TT = parseFloat(ttInput.value);
         const yenrate = parseFloat(yenrateInput.value);
         const clearing = parseFloat(clearingInput.value);
         const taxCategory = taxCategorySelect.value;
@@ -953,10 +954,6 @@ async function generatePDF() {
         const shippingDetails = getShippingCharges(vehicle);
         const shipping = shippingDetails.charge;
         const exporter = parseInt(exporterSelect.value);
-
-        if (exporter == ICM) {
-            TT = getMaxDiscountVoucher(winningBid);
-        }
 
         const handling = calculateCharges(winningBid, exporter);
         let auctionFee = 0;
@@ -2173,7 +2170,10 @@ updateSurchargeToggleLabel();
 document.addEventListener('DOMContentLoaded', updateVehicleVariants);
 vehicleSelect.addEventListener('change', updateVehicleVariants);
 vehicleVariantSelect.addEventListener('change', applyVehicleVariant);
-winningBidInput.addEventListener('input', calculateAndDisplay);
+winningBidInput.addEventListener('input', () => {
+    syncTTFromBid();
+    calculateAndDisplay();
+});
 areaCostInput.addEventListener('input', calculateAndDisplay);
 ssclInput.addEventListener('input', calculateAndDisplay);
 auctionFeeInput.addEventListener('input', calculateAndDisplay);
@@ -2183,7 +2183,10 @@ clearingInput.addEventListener('input', calculateAndDisplay);
 capacityInput.addEventListener('input', calculateAndDisplay);
 taxCategorySelect.addEventListener('change', calculateAndDisplay); // NEW
 taxBaseInput.addEventListener('input', calculateAndDisplay);
-exporterSelect.addEventListener('change', calculateAndDisplay);
+exporterSelect.addEventListener('change', () => {
+    syncTTFromBid();
+    calculateAndDisplay();
+});
 downloadPdfBtn.addEventListener('click', generatePDF);
 downloadReceiptBtn.addEventListener('click', generateReceiptPDF);
 
