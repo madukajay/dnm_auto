@@ -1591,37 +1591,37 @@ const vehicleDefaults = {
     "Nissan Dayz": [{ 
         label: "S", 
         taxCategory: "petrol_under_1000", 
-        taxbase: 1437700, 
+        taxbase: 1457700, 
         capacity: 660, 
         winningBid: 950000 
     },{
         label: "X", 
         taxCategory: "petrol_under_1000", 
-        taxbase: 1478400, 
+        taxbase: 1500400, 
         capacity: 660, 
         winningBid: 1250000 
     },{
         label: "Highway Star X", 
         taxCategory: "petrol_under_1000", 
-        taxbase: 1698400, 
+        taxbase: 1745700, 
         capacity: 660, 
         winningBid: 1300000 
     },{
         label: "Highway Star X ProPilot Edition", 
         taxCategory: "petrol_under_1000", 
-        taxbase: 1798500, 
+        taxbase: 1834800, 
         capacity: 660, 
         winningBid: 1550000 
     },{
         label: "Highway Star G Turbo", 
         taxCategory: "petrol_under_1000", 
-        taxbase: 1838100, 
+        taxbase: 1888700, 
         capacity: 660, 
         winningBid: 1300000 
     },{
         label: "Highway Star G Turbo ProPilot Edition", 
         taxCategory: "petrol_under_1000", 
-        taxbase: 1929400, 
+        taxbase: 1964600, 
         capacity: 660, 
         winningBid: 1550000 
     }],
@@ -1913,31 +1913,31 @@ const vehicleDefaults = {
     "Raize": [{
         label: "X 1.0L",
         taxCategory: "petrol_under_1000",
-        taxbase: 2079000,
+        taxbase: 2157100,
         capacity: 996,
         winningBid: 1800000
     },{
         label: "G 1.0L",
         taxCategory: "petrol_under_1000",
-        taxbase: 2235200,
+        taxbase: 2313300,
         capacity: 996,
         winningBid: 2000000
     },{
         label: "Z 1.0L",
         taxCategory: "petrol_under_1000",
-        taxbase: 2413400,
+        taxbase: 2491500,
         capacity: 996,
         winningBid: 2500000
     },{
         label: "G 1.2L HV",
         taxCategory: "hev_50_100_1year",
-        taxbase: 2263800,
+        taxbase: 2399100,
         capacity: 78,
         winningBid: 2100000
     },{
         label: "Z 1.2L HV",
         taxCategory: "hev_50_100_1year",
-        taxbase: 2442000,
+        taxbase: 2560800,
         capacity: 78,
         winningBid: 2500000
     }],
